@@ -160,52 +160,28 @@ function openRecordPhotos(id){
 function closeRecordPhotos(){const m=document.getElementById("recordPhotoModal");if(m)m.remove();}
 function recordCard(r){
  const h=data.hives.find(x=>x.id===r.hiveId);
- const labels={inspection:"内見",harvest:"採蜜",addbox:"次箱",medicine:"薬設置",remove:"撤去",move:"移動"};
  const cls={inspection:"record-color-inspection",harvest:"record-color-harvest",addbox:"record-color-addbox",medicine:"record-color-medicine",remove:"record-color-remove",move:"record-color-move"};
- const details=[];
+ const lines=[];
+ const add=(name,text)=>{if(text)lines.push({name,text});};
+ if(r.inspectionIncluded) add("内見","作業後の状態を反映");
+ if(r.inspectionFeed) add("給餌",esc(r.inspectionFeed));
  if(r.harvestBoxTiers?.length || r.harvestBoxes || r.harvestFlows?.length){
-   const hb=r.harvestBoxes||r.harvestBoxTiers?.length||0;
-   const hf=r.harvestFlows||[];
-   details.push(`<div><b>採蜜</b><div style="margin-left:0.5em">重箱　${hb}箱${hf.length?`<br>ハイブ　${hf.map(i=>`基${i+1}`).join("<br>　　　　")}`:""}</div></div>`);
+   const hb=r.harvestBoxes||r.harvestBoxTiers?.length||0, hf=r.harvestFlows||[];
+   if(hb) add("採蜜",`重箱　${hb}箱`);
+   if(hf.length) add("",`ハイブ　${hf.map(i=>`基 ${i+1}`).join("<br>　　　　")}`);
  }
- if(r.inspectionIncluded && r.inspectionFeed){details.push(`<div><b>給餌</b>　${esc(r.inspectionFeed)}</div>`);}
- else if(!r.inspectionIncluded && r.feed){details.push(`<div><b>給餌</b>　${esc(r.feed)}</div>`);}
- if(r.addBoxes)details.push(`<div><b>次箱</b>　重箱＋${r.addBoxes}箱</div>`);
- if(r.addFlows)details.push(`<div><b>次箱</b>　フローハイブ＋${r.addFlows}基</div>`);
- if(r.removeBoxTiers?.length)details.push(`<div><b>撤去</b>　重箱 ${r.removeBoxTiers.map(x=>`${x}段目`).join("、")}</div>`);
- else if(r.removeBoxes)details.push(`<div><b>撤去</b>　重箱 ${r.removeBoxes}箱</div>`);
- if(r.removeFlows?.length)details.push(`<div><b>撤去</b>　フローハイブ ${r.removeFlows.map(i=>`基${i+1}`).join("、")}</div>`);
- if(r.movePlace)details.push(`<div><b>移動</b><div class="move-location">${esc(r.moveFromPlace||"未設定")}<br>↓<br>${esc(r.movePlace)}</div></div>`);
- if(r.medicineName)details.push(`<div><b>薬</b>　${esc(r.medicineName)} ${esc(r.medicineAmount||"")}　${esc(r.medicinePlace||"")}</div>`);
- if(r.feed)details.push(`<div><b>給餌</b>　${esc(r.feed)}</div>`);
- if(r.memo)details.push(`<div class="record-memo">${esc(r.memo)}</div>`);
- const photos=(r.photos||[]).filter(Boolean);if(!photos.length&&r.photo)photos.push(r.photo);
- const figure=recordHiveFigure(r);
- const status=esc(r.status||h?.status||"未設定");
- return `<div class="record-swipe" data-record-id="${esc(r.id||"")}">
-   <button class="record-delete" type="button" onclick="deleteRecord('${esc(r.id||"")}')">削除</button>
-   <div class="record-b-card">
-   <div class="record-b-layout">
-     <div class="record-b-left ${cls[r.workType]||"record-color-inspection"}">
-       <div class="record-b-type">${labels[r.workType]||"作業"}</div>
-       <div class="record-b-year">${esc((r.date||"").slice(0,4))}年</div>
-       <div class="record-b-monthday">${esc((r.date||"").slice(5).replace(/-/g,"/"))}</div>
-       <div class="record-b-weather">${esc(r.weather||"")}</div>
-       <div class="record-b-temp">${r.temp!=null&&r.temp!==""?esc(r.temp)+"℃":""}</div>
-     </div>
-     <div class="record-b-center">
-       <div class="record-b-section">群の名前</div>
-       <div class="record-b-value">${esc(h?.name||"削除済み")}</div>
-       <div class="record-b-section">群の状況</div>
-       <div class="record-b-value">${status}</div>
-       <div class="record-b-section">作業の内容</div>
-       <div class="record-b-work">${details.join("")||'<div class="muted">記録内容なし</div>'}</div>
-       ${photos.length?`<button class="record-photo-button" type="button" onclick="openRecordPhotos('${esc(r.id||"")}')">📷 写真を見る（${photos.length}枚）</button>`:""}
-     </div>
-     <div class="record-b-right">${figure}</div>
-   </div>
- </div></div>`;
+ if(r.addBoxes) add("次箱",`重箱＋${r.addBoxes}箱`);
+ if(r.addFlows) add("",`フローハイブ＋${r.addFlows}基`);
+ if(r.removeBoxTiers?.length) add("撤去",`重箱 ${r.removeBoxTiers.map(x=>`${x}段目`).join("、")}`);
+ else if(r.removeBoxes) add("撤去",`重箱 ${r.removeBoxes}箱`);
+ if(r.removeFlows?.length) add("",`フローハイブ ${r.removeFlows.map(i=>`基 ${i+1}`).join("、")}`);
+ if(r.movePlace) add("移動",`${esc(r.moveFromPlace||"未設定")}<br>↓<br>${esc(r.movePlace)}`);
+ if(r.medicineName) add("薬設置",`${esc(r.medicineName)} ${esc(r.medicineAmount||"")}　${esc(r.medicinePlace||"")}`);
+ if(r.feed) add("給餌",esc(r.feed));
+ const workHtml=lines.map(x=>`<div class="work-content-line"><b>${x.name}</b>${x.name?"　":"　　　"}${x.text}</div>`).join("");
+ return `<div class="record-card ${cls[r.workType]||"record-color-inspection"}" data-id="${r.id}"><div class="record-main"><div class="record-date">${fmt(r.date)}<div class="record-work-label">${esc(r.workLabel||"")}</div></div><div class="record-body"><div class="record-b-section">作業の内容</div>${workHtml}${r.memo?`<div class="record-b-section">メモ</div><div>${esc(r.memo)}</div>`:""}${r.photos?.length?`<button class="photo-btn" onclick='openRecordPhotos(${JSON.stringify(r.photos)})'>📷 写真を見る</button>`:""}</div></div>${h?`<div class="record-after">${stackHtml(+r.afterRealTiers||+h.realTiers||0,+r.afterBuiltTiers||+h.builtTiers||0)}</div>`:""}</div>`;
 }
+
 function records(m){const rs=[...data.records].sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));m.innerHTML=`<div class="row"><div><h2 style="margin:0">記録</h2><div class="muted">すべての作業に内検を含みます</div></div><button onclick="newRecord()">＋ 記録</button></div><div style="margin-top:14px">${rs.length?rs.map(recordCard).join(""):'<div class="card empty">まだ記録がありません。</div>'}</div>`}
 function newRecord(hiveId){
  const m=document.getElementById("main");currentTab="records";
