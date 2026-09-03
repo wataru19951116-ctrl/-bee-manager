@@ -29,9 +29,9 @@ input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radiu
 .flow-frame[data-level="少ない"] .honey{height:18%}.flow-frame[data-level="半分"] .honey{height:43%}.flow-frame[data-level="多い"] .honey{height:68%}.flow-frame[data-level="満杯"] .honey{height:88%}
 .flow-label{font-size:12px;font-weight:700;margin-top:4px}.flow-level{font-size:11px;color:var(--muted);margin-top:2px}
 .box-stack{display:flex;flex-direction:column;gap:4px;margin-top:10px}.box-tier{height:38px;border:2px solid #9b6b32;border-radius:6px;background:#eee8d6;display:flex;align-items:center;justify-content:center;font-size:12px}.box-tier.built{background:#f5d36b;font-weight:700}
-.work-choice{display:grid;grid-template-columns:1fr 1fr;gap:8px}.work-choice button{background:#eee}.work-choice button.selected{background:var(--accent)}
+.work-register-section-title{font-size:15px;font-weight:800;margin:12px 0 7px;padding:0}.work-choice{display:grid;grid-template-columns:1fr 1fr;gap:8px}.work-choice button{background:#eee}.work-choice button.selected{background:var(--accent)}
 .check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.check{border:1px solid #ddd;border-radius:10px;padding:10px;background:#fff}.check input{width:auto;margin-right:6px}
-</style>
+.move-location{margin-top:4px;line-height:1.45;text-align:left}</style>
 
 <style id="record-b-model-v3">
 .record-b-card{background:#fff;border:1px solid #e5e3dc;border-radius:16px;margin-bottom:12px;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,.045)}
@@ -163,15 +163,16 @@ function recordCard(r){
  const labels={inspection:"内見",harvest:"採蜜",addbox:"次箱",medicine:"薬設置",remove:"撤去",move:"移動"};
  const cls={inspection:"record-color-inspection",harvest:"record-color-harvest",addbox:"record-color-addbox",medicine:"record-color-medicine",remove:"record-color-remove",move:"record-color-move"};
  const details=[];
- if(r.inspectionIncluded){if(r.inspectionFeed)details.push(`<div><b>内検・給餌</b>　${esc(r.inspectionFeed)}</div>`);}
- if(r.harvestBoxTiers?.length)details.push(`<div><b>採蜜</b>　重箱 ${r.harvestBoxTiers.length}箱</div>`); else if(r.harvestBoxes)details.push(`<div><b>採蜜</b>　重箱 ${r.harvestBoxes}箱</div>`);
- if(r.harvestFlows?.length)details.push(`<div><b>採蜜</b>　フローハイブ ${r.harvestFlows.map(i=>`${i+1}基目`).join("、")}</div>`);
+ if(r.inspectionIncluded){if(r.inspectionFeed)details.push(`<div><b>給餌</b>　${esc(r.inspectionFeed)}</div>`);}
+ if(r.harvestBoxTiers?.length)details.push(`<div><b>採蜜</b>　重箱 ${r.harvestBoxTiers.map(x=>`${x}段目`).join("、")}</div>`);
+ else if(r.harvestBoxes)details.push(`<div><b>採蜜</b>　重箱 ${r.harvestBoxes}箱</div>`);
+ if(r.harvestFlows?.length)details.push(`<div><b>採蜜</b>　フローハイブ ${r.harvestFlows.map(i=>`基${i+1}`).join("、")}</div>`);
  if(r.addBoxes)details.push(`<div><b>次箱</b>　重箱＋${r.addBoxes}箱</div>`);
  if(r.addFlows)details.push(`<div><b>次箱</b>　フローハイブ＋${r.addFlows}基</div>`);
  if(r.removeBoxTiers?.length)details.push(`<div><b>撤去</b>　重箱 ${r.removeBoxTiers.map(x=>`${x}段目`).join("、")}</div>`);
  else if(r.removeBoxes)details.push(`<div><b>撤去</b>　重箱 ${r.removeBoxes}箱</div>`);
  if(r.removeFlows?.length)details.push(`<div><b>撤去</b>　フローハイブ ${r.removeFlows.map(i=>`基${i+1}`).join("、")}</div>`);
- if(r.movePlace)details.push(`<div><b>移動</b>　${esc(r.moveGroupSize||"未設定")} → ${esc(r.movePlace)}</div>`);
+ if(r.movePlace)details.push(`<div><b>移動</b><div class="move-location">${esc(r.moveFromPlace||"未設定")}<br>↓<br>${esc(r.movePlace)}</div></div>`);
  if(r.medicineName)details.push(`<div><b>薬</b>　${esc(r.medicineName)} ${esc(r.medicineAmount||"")}　${esc(r.medicinePlace||"")}</div>`);
  if(r.feed)details.push(`<div><b>給餌</b>　${esc(r.feed)}</div>`);
  if(r.memo)details.push(`<div class="record-memo">${esc(r.memo)}</div>`);
@@ -235,12 +236,12 @@ function updateWorkArea(){
  const area=document.getElementById("workArea"),feed=document.getElementById("feedArea");if(!area)return;
  area.innerHTML="";if(feed)feed.innerHTML="";
  const h=data.hives.find(x=>x.id===document.getElementById("rh")?.value);if(!h)return;
- if(selectedWorks.includes("inspection")){area.innerHTML+=`<div class="card"><div class="section-title">内検</div><label>群の状態</label><select id="rs"><option>強群</option><option>普通</option><option>弱群</option><option>未設定</option></select><label>巣あり段数（上から）</label><input id="rbuilt" type="number" min="0" max="${h.realTiers||0}" value="${h.builtTiers||0}"></div>`;feed.innerHTML=`<div class="card"><div class="section-title">給餌</div><div class="check-grid"><label class="check"><input id="feedWater" type="checkbox">水</label><label class="check"><input id="feedFood" type="checkbox">餌</label></div></div>`}
- if(selectedWorks.includes("harvest")){const realTiers=+h.realTiers||0,builtTiers=Math.min(+h.builtTiers||0,realTiers);harvestSelectedCount=Math.min(Math.max(0,harvestSelectedCount),builtTiers);area.innerHTML+=`<div class="card"><div class="section-title">採蜜</div><label>採蜜する重箱を図から選択</label><div class="hint">タップすると上から1箱ずつ消えていきます。</div><div class="box-stack" id="harvestBoxes">${harvestStackHtml(realTiers,builtTiers,harvestSelectedCount)}</div><div class="hint">採蜜する箱：${harvestSelectedCount}箱</div>${h.flowCount?`<label>採蜜するフローハイブ</label><div class="check-grid">${Array.from({length:h.flowCount},(_,i)=>`<label class="check"><input type="checkbox" class="harvest-flow" value="${i}"> ${i+1}基目</label>`).join("")}</div>`:""}</div>`;}
- if(selectedWorks.includes("addbox"))area.innerHTML+=`<div class="card"><div class="section-title">次箱</div><label>追加する重箱の数</label><input id="addBoxes" type="number" min="0" value="0"><label>追加するフローハイブの基数</label><input id="addFlows" type="number" min="0" value="0"></div>`;
- if(selectedWorks.includes("medicine"))area.innerHTML+=`<div class="card"><div class="section-title">薬設置</div><label>薬の名前</label><input id="medicineName"><label>量</label><input id="medicineAmount"><label>設置場所</label><input id="medicinePlace"></div>`;
- if(selectedWorks.includes("remove"))area.innerHTML+=`<div class="card"><div class="section-title">撤去</div><label>撤去する重箱を図から選択</label><div class="box-stack" id="removeBoxes">${stackHtml(+h.realTiers||0,Math.min(+h.builtTiers||0,+h.realTiers||0),true)}</div>${h.flowCount?`<label>撤去するフローハイブ</label><div class="check-grid">${Array.from({length:h.flowCount},(_,i)=>`<label class="check"><input type="checkbox" class="remove-flow" value="${i}"> ${i+1}基目</label>`).join("")}</div>`:""}</div>`;
- if(selectedWorks.includes("move"))area.innerHTML+=`<div class="card"><div class="section-title">移動</div><label>移動時の群の大きさ</label><input value="${esc(h.status||"未設定")}" readonly><label>移動後の群の場所</label><input id="movePlace" value="${esc(h.place||"")}"></div>`;
+ if(selectedWorks.includes("inspection")){area.innerHTML+=`<div class="work-register-section-title">内検</div><div class="card"><label>群の状態</label><select id="rs"><option>強群</option><option>普通</option><option>弱群</option><option>未設定</option></select><label>巣あり段数（上から）</label><input id="rbuilt" type="number" min="0" max="${h.realTiers||0}" value="${h.builtTiers||0}"></div>`;feed.innerHTML=(selectedWorks.length===1)?`<div class="work-register-section-title">給餌</div><div class="card"><div class="check-grid"><label class="check"><input id="feedWater" type="checkbox">水</label><label class="check"><input id="feedFood" type="checkbox">餌</label></div></div>`:""}
+ if(selectedWorks.includes("harvest")){const realTiers=+h.realTiers||0,builtTiers=Math.min(+h.builtTiers||0,realTiers);harvestSelectedCount=Math.min(Math.max(0,harvestSelectedCount),builtTiers);area.innerHTML+=`<div class="work-register-section-title">採蜜</div><div class="card"><label>採蜜する重箱を図から選択</label><div class="hint">タップすると上から1箱ずつ消えていきます。</div><div class="box-stack" id="harvestBoxes">${harvestStackHtml(realTiers,builtTiers,harvestSelectedCount)}</div><div class="hint">採蜜する箱：${harvestSelectedCount}箱</div>${h.flowCount?`<label>採蜜するフローハイブ</label><div class="check-grid">${Array.from({length:h.flowCount},(_,i)=>`<label class="check"><input type="checkbox" class="harvest-flow" value="${i}"> ${i+1}基目</label>`).join("")}</div>`:""}</div>`;}
+ if(selectedWorks.includes("addbox"))area.innerHTML+=`<div class="work-register-section-title">次箱</div><div class="card"><label>追加する重箱の数</label><input id="addBoxes" type="number" min="0" value="0"><label>追加するフローハイブの基数</label><input id="addFlows" type="number" min="0" value="0"></div>`;
+ if(selectedWorks.includes("medicine"))area.innerHTML+=`<div class="work-register-section-title">薬設置</div><div class="card"><label>薬の名前</label><input id="medicineName"><label>量</label><input id="medicineAmount"><label>設置場所</label><input id="medicinePlace"></div>`;
+ if(selectedWorks.includes("remove"))area.innerHTML+=`<div class="work-register-section-title">撤去</div><div class="card"><label>撤去する重箱を図から選択</label><div class="box-stack" id="removeBoxes">${stackHtml(+h.realTiers||0,Math.min(+h.builtTiers||0,+h.realTiers||0),true)}</div>${h.flowCount?`<label>撤去するフローハイブ</label><div class="check-grid">${Array.from({length:h.flowCount},(_,i)=>`<label class="check"><input type="checkbox" class="remove-flow" value="${i}"> ${i+1}基目</label>`).join("")}</div>`:""}</div>`;
+ if(selectedWorks.includes("move"))area.innerHTML+=`<div class="work-register-section-title">移動</div><div class="card"><label>移動時の群の大きさ</label><input value="${esc(h.status||"未設定")}" readonly><label>移動後の群の場所</label><input id="movePlace" value="${esc(h.place||"")}"></div>`;
  updatePhotoFields();
 }
 function updatePhotoFields(){
@@ -293,7 +294,7 @@ async function saveRecord(){
   if(type==="addbox"){const ab=+document.getElementById("addBoxes")?.value||0,af=+document.getElementById("addFlows")?.value||0;real+=ab;flowCount+=af;for(let i=0;i<af;i++)flowLevels.push("空");rec.addBoxes=ab;rec.addFlows=af}
   if(type==="medicine"){rec.medicineName=document.getElementById("medicineName")?.value||"";rec.medicineAmount=document.getElementById("medicineAmount")?.value||"";rec.medicinePlace=document.getElementById("medicinePlace")?.value||""}
   if(type==="remove"){const boxes=[...document.querySelectorAll("#removeBoxes .box-tier.selected")].map(e=>+e.dataset.tier),fs=[...document.querySelectorAll(".remove-flow:checked")].map(e=>+e.value),rm=new Set(fs);real=Math.max(0,real-boxes.length);built=Math.min(built,real);flowLevels=flowLevels.filter((_,i)=>!rm.has(i));flowCount=flowLevels.length;rec.removeBoxes=boxes.length;rec.removeBoxTiers=boxes;rec.removeFlows=fs}
-  if(type==="move"){const p=document.getElementById("movePlace")?.value.trim()||"";rec.moveGroupSize=hive.status||"未設定";rec.movePlace=p;if(p)hive.place=p}
+  if(type==="move"){const p=document.getElementById("movePlace")?.value.trim()||"";rec.moveFromPlace=hive.place||"未設定";rec.movePlace=p;if(p)hive.place=p}
   rec.realTiers=real;rec.builtTiers=built;rec.flowCount=flowCount;rec.flowHive=flowCount>0;rec.flowLevels=flowLevels;
   if(!rec.feed)rec.feed=rec.inspectionFeed||"";
   created.push(rec);
