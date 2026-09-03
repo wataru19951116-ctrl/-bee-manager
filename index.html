@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5b400">
+<meta name="bee-manager-version" content="V39">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -65,6 +66,7 @@ input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radiu
 .record-flow-frame[data-level="満杯"] .record-honey{height:88%}
 .record-flow-frame span{position:absolute;bottom:0;left:0;right:0;font-size:6px;line-height:9px;font-weight:800;z-index:3}
 .record-flow-level{font-size:6px;color:#777;white-space:nowrap;overflow:hidden}
+.harvest-flow-picker .flow-item{cursor:pointer}.harvest-flow-picker .flow-frame.selected{outline:3px solid #f5b400;background:#ffe9a3}
 .record-box-title{font-size:7px;font-weight:800;color:#333;margin:0 0 3px}
 .record-box-stack{display:flex;flex-direction:column;gap:2px;margin:0 4px}
 .record-box-tier{height:17px;border:1.4px solid #936b45;border-radius:3px;background:#eee;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;box-sizing:border-box}
@@ -91,7 +93,6 @@ input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radiu
 .record-swipe.open .record-b-card{transform:translateX(-78px)}
 .harvest-box-picker .box-tier{cursor:pointer}
 </style>
-<meta name="bee-manager-version" content="V38">
 </head>
 <body>
 <div class="app">
@@ -164,48 +165,49 @@ function recordCard(r){
  const labels={inspection:"内見",harvest:"採蜜",addbox:"次箱",medicine:"薬設置",remove:"撤去",move:"移動"};
  const cls={inspection:"record-color-inspection",harvest:"record-color-harvest",addbox:"record-color-addbox",medicine:"record-color-medicine",remove:"record-color-remove",move:"record-color-move"};
  const details=[];
-  const feedText=r.inspectionFeed||r.feed;if(feedText)details.push(`<div><b>給餌</b>　${esc(feedText)}</div>`);
  if(r.harvestBoxTiers?.length || r.harvestBoxes || r.harvestFlows?.length){
    const hb=r.harvestBoxes||r.harvestBoxTiers?.length||0;
    const hf=r.harvestFlows||[];
-   details.push(`<div><b>採蜜</b><div style="margin-left:0.5em">重箱　${hb}箱${hf.length?`<br>ハイブ　${hf.map(i=>`基${i+1}`).join("<br>　　　　")}`:""}</div></div>`);
+   details.push(`<div><b>採蜜</b><div style="margin-left:0.5em">重箱　　${hb}箱${hf.length?`<br>ハイブ　${hf.length}基`:""}</div></div>`);
  }
- if(r.inspectionIncluded && r.inspectionFeed){details.push(`<div><b>給餌</b>　${esc(r.inspectionFeed)}</div>`);}
- else if(!r.inspectionIncluded && r.feed){details.push(`<div><b>給餌</b>　${esc(r.feed)}</div>`);}
- if(r.addBoxes)details.push(`<div><b>次箱</b>　重箱＋${r.addBoxes}箱</div>`);
- if(r.addFlows)details.push(`<div><b>次箱</b>　フローハイブ＋${r.addFlows}基</div>`);
+ // 給餌は保存形式がinspectionFeed/feedのどちらでも1回だけ表示
+ const feedText=r.inspectionFeed||r.feed;
+ if(feedText)details.push(`<div><b>給餌</b>　${esc(feedText)}</div>`);
+ if(r.addBoxes||r.addFlows){
+   details.push(`<div><b>次箱</b><div style="margin-left:0.5em">${r.addBoxes?`重箱　${r.addBoxes}段`:""}${r.addFlows?`${r.addBoxes?`<br>`:``}ハイブ　${r.addFlows}基`:``}</div></div>`);
+ }
  if(r.removeBoxTiers?.length)details.push(`<div><b>撤去</b>　重箱 ${r.removeBoxTiers.map(x=>`${x}段目`).join("、")}</div>`);
  else if(r.removeBoxes)details.push(`<div><b>撤去</b>　重箱 ${r.removeBoxes}箱</div>`);
  if(r.removeFlows?.length)details.push(`<div><b>撤去</b>　フローハイブ ${r.removeFlows.map(i=>`基${i+1}`).join("、")}</div>`);
  if(r.movePlace)details.push(`<div><b>移動</b><div class="move-location">${esc(r.moveFromPlace||"未設定")}<br>↓<br>${esc(r.movePlace)}</div></div>`);
  if(r.medicineName)details.push(`<div><b>薬</b>　${esc(r.medicineName)} ${esc(r.medicineAmount||"")}　${esc(r.medicinePlace||"")}</div>`);
- if(r.memo)details.push(`<div class="record-memo">${esc(r.memo)}</div>`);
  const photos=(r.photos||[]).filter(Boolean);if(!photos.length&&r.photo)photos.push(r.photo);
  const figure=recordHiveFigure(r);
  const status=esc(r.status||h?.status||"未設定");
  return `<div class="record-swipe" data-record-id="${esc(r.id||"")}">
-   <button class="record-delete" type="button" onclick="deleteRecord('${esc(r.id||"")}')">削除</button>
-   <div class="record-b-card">
+  <button class="record-delete" type="button" onclick="deleteRecord('${esc(r.id||"")}')">削除</button>
+  <div class="record-b-card">
    <div class="record-b-layout">
-     <div class="record-b-left ${cls[r.workType]||"record-color-inspection"}">
-       <div class="record-b-type">${labels[r.workType]||"作業"}</div>
-       <div class="record-b-year">${esc((r.date||"").slice(0,4))}年</div>
-       <div class="record-b-monthday">${esc((r.date||"").slice(5).replace(/-/g,"/"))}</div>
-       <div class="record-b-weather">${esc(r.weather||"")}</div>
-       <div class="record-b-temp">${r.temp!=null&&r.temp!==""?esc(r.temp)+"℃":""}</div>
-     </div>
-     <div class="record-b-center">
-       <div class="record-b-section">群の名前</div>
-       <div class="record-b-value">${esc(h?.name||"削除済み")}</div>
-       <div class="record-b-section">群の状況</div>
-       <div class="record-b-value">${status}</div>
-       <div class="record-b-section">作業の内容</div>
-       <div class="record-b-work">${details.join("")||'<div class="muted">記録内容なし</div>'}</div>
-       ${photos.length?`<button class="record-photo-button" type="button" onclick="openRecordPhotos('${esc(r.id||"")}')">📷 写真を見る（${photos.length}枚）</button>`:""}
-     </div>
-     <div class="record-b-right">${figure}</div>
+    <div class="record-b-left ${cls[r.workType]||"record-color-inspection"}">
+     <div class="record-b-type">${labels[r.workType]||"作業"}</div>
+     <div class="record-b-year">${esc((r.date||"").slice(0,4))}年</div>
+     <div class="record-b-monthday">${esc((r.date||"").slice(5).replace(/-/g,"/"))}</div>
+     <div class="record-b-weather">${esc(r.weather||"")}</div>
+     <div class="record-b-temp">${r.temp!=null&&r.temp!==""?esc(r.temp)+"℃":""}</div>
+    </div>
+    <div class="record-b-center">
+     <div class="record-b-section">群の名前</div>
+     <div class="record-b-value">${esc(h?.name||"削除済み")}</div>
+     <div class="record-b-section">群の状況</div>
+     <div class="record-b-value">${status}</div>
+     <div class="record-b-section">作業の内容</div>
+     <div class="record-b-work">${details.join("")||'<div class="muted">記録内容なし</div>'}</div>
+     ${photos.length?`<button class="record-photo-button" type="button" onclick="openRecordPhotos('${esc(r.id||"")}')">📷 写真を見る（${photos.length}枚）</button>`:""}
+    </div>
+    <div class="record-b-right">${figure}</div>
    </div>
- </div></div>`;
+  </div>
+ </div>`;
 }
 function records(m){const rs=[...data.records].sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));m.innerHTML=`<div class="row"><div><h2 style="margin:0">記録</h2><div class="muted">すべての作業に内検を含みます</div></div><button onclick="newRecord()">＋ 記録</button></div><div style="margin-top:14px">${rs.length?rs.map(recordCard).join(""):'<div class="card empty">まだ記録がありません。</div>'}</div>`}
 function newRecord(hiveId){
@@ -232,7 +234,7 @@ function setWork(type){
 }
 function updateFlowRecord(){const area=document.getElementById("flowRecordArea");if(area)area.innerHTML=""}
 function cycleRecordFlow(i){const el=document.getElementById("rf"+i),lab=document.getElementById("rfl"+i),seq=["空","少ない","半分","多い","満杯"];if(!el)return;const next=seq[(seq.indexOf(el.dataset.level)+1)%seq.length];el.dataset.level=next;el.setAttribute("data-level",next);lab.textContent=next}
-function harvestFlowHtml(h){const n=Number(h.flowCount||0);if(!n)return "";return `<label>採蜜するフローハイブ</label><div class="flow-row" id="harvestFlowBoxes">${Array.from({length:n},(_,i)=>{const level=harvestFlowSelected.includes(i)?"空":((h.flowLevels||[])[i]||"空");return `<div class="flow-item"><div class="flow-frame" id="hf${i}" data-level="${esc(level)}" onclick="tapHarvestFlow(${i})"><div class="honey"></div></div><div class="flow-label">基 ${i+1}</div><div class="flow-level" id="hfl${i}">${esc(level)}</div></div>`}).join("")}</div><div class="hint">採蜜する基をタップすると「空」になります。</div>`}
+function harvestFlowHtml(h){const n=Number(h.flowCount||0);if(!n)return "";return `<label>採蜜するフローハイブ</label><div class="flow-row" id="harvestFlowBoxes">${Array.from({length:n},(_,i)=>{const level=harvestFlowSelected.includes(i)?"空":((h.flowLevels||[])[i]||"空");return `<div class="flow-item"><div class="flow-frame ${harvestFlowSelected.includes(i)?"selected":""}" id="hf${i}" data-level="${esc(level)}" onclick="tapHarvestFlow(${i})"><div class="honey"></div></div><div class="flow-label">基 ${i+1}</div><div class="flow-level" id="hfl${i}">${esc(level)}</div></div>`}).join("")}</div><div class="hint">採蜜する基をタップすると「空」になります。</div>`}
 function tapHarvestFlow(i){const h=data.hives.find(x=>x.id===document.getElementById("rh")?.value);if(!h)return;const level=(h.flowLevels||[])[i]||"空";if(level==="空"&&!harvestFlowSelected.includes(i))return;if(harvestFlowSelected.includes(i)){harvestFlowSelected=harvestFlowSelected.filter(x=>x!==i);updateWorkArea();return}harvestFlowSelected.push(i);updateWorkArea()}
 function updateWorkArea(){
  const area=document.getElementById("workArea"),feed=document.getElementById("feedArea");if(!area)return;
@@ -303,7 +305,6 @@ async function saveRecord(){
   if(type==="remove"){const boxes=[...document.querySelectorAll("#removeBoxes .box-tier.selected")].map(e=>+e.dataset.tier),fs=[...document.querySelectorAll(".remove-flow:checked")].map(e=>+e.value),rm=new Set(fs);real=Math.max(0,real-boxes.length);built=Math.min(built,real);flowLevels=flowLevels.filter((_,i)=>!rm.has(i));flowCount=flowLevels.length;rec.removeBoxes=boxes.length;rec.removeBoxTiers=boxes;rec.removeFlows=fs}
   if(type==="move"){const p=document.getElementById("movePlace")?.value.trim()||"";rec.moveFromPlace=hive.place||"未設定";rec.movePlace=p;if(p)hive.place=p}
   rec.realTiers=real;rec.builtTiers=built;rec.flowCount=flowCount;rec.flowHive=flowCount>0;rec.flowLevels=flowLevels;
-  if(!rec.feed)rec.feed=rec.inspectionFeed||"";
   created.push(rec);
  }
  hive.realTiers=real;hive.builtTiers=built;hive.flowCount=flowCount;hive.flowHive=flowCount>0;hive.flowLevels=flowLevels;data.records.push(...created);
