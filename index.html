@@ -86,7 +86,7 @@ input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radiu
 .record-swipe.open .record-b-card{transform:translateX(-78px)}
 .harvest-box-picker .box-tier{cursor:pointer}
 </style>
-</head>
+<meta name="bee-manager-version" content="V36">\n</head>
 <body>
 <div class="app">
 <header><h1>🐝 養蜂管理</h1><div class="date" id="today"></div></header>
@@ -142,43 +142,45 @@ function recordHiveFigure(r){
  return `<div class="record-hive-figure">${flow}<div class="record-box-title">重箱（巣の状態）</div><div class="record-box-stack">${boxes}</div><div class="record-hive-caption">作業後の巣箱</div></div>`;
 }
 function recordCard(r){
- const h=data.hives.find(x=>x.id===r.hiveId);
- const labels={inspection:"内見",harvest:"採蜜",addbox:"次箱",medicine:"薬設置",remove:"撤去",move:"移動"};
- const cls={inspection:"record-color-inspection",harvest:"record-color-harvest",addbox:"record-color-addbox",medicine:"record-color-medicine",remove:"record-color-remove",move:"record-color-move"};
- const details=[];
- if(r.status)details.push(`<div><b>群の状態</b>　${esc(r.status)}</div>`);
- if(r.inspectionIncluded)details.push(`<div><b>内検</b>　作業後の状態を反映</div>`);
- if(r.harvestBoxTiers?.length)details.push(`<div><b>採蜜</b>　重箱 ${r.harvestBoxTiers.map(x=>`${x}段目`).join("、")}</div>`);
- else if(r.harvestBoxes)details.push(`<div><b>採蜜</b>　重箱 ${r.harvestBoxes}箱</div>`);
- if(r.harvestFlows?.length)details.push(`<div><b>採蜜</b>　フローハイブ ${r.harvestFlows.map(i=>`基${i+1}`).join("、")}</div>`);
- if(r.addBoxes||r.addFlows)details.push(`<div><b>次箱</b>　${r.addBoxes?`重箱　${r.addBoxes}段`:``}${r.addFlows?`<br><span class="work-subline">　　　ハイブ　${r.addFlows}基</span>`:``}</div>`);
- if(r.removeBoxTiers?.length)details.push(`<div><b>撤去</b>　重箱 ${r.removeBoxTiers.map(x=>`${x}段目`).join("、")}</div>`);
- else if(r.removeBoxes)details.push(`<div><b>撤去</b>　重箱 ${r.removeBoxes}箱</div>`);
- if(r.removeFlows?.length)details.push(`<div><b>撤去</b>　フローハイブ ${r.removeFlows.map(i=>`基${i+1}`).join("、")}</div>`);
- if(r.movePlace)details.push(`<div><b>移動</b>　${esc(r.moveGroupSize||"未設定")} → ${esc(r.movePlace)}</div>`);
- if(r.medicineName)details.push(`<div><b>薬</b>　${esc(r.medicineName)} ${esc(r.medicineAmount||"")}　${esc(r.medicinePlace||"")}</div>`);
- if(r.feed)details.push(`<div><b>給餌</b>　${esc(r.feed)}</div>`);
- if(r.memo)details.push(`<div class="record-memo">${esc(r.memo)}</div>`);
- const photos=(r.photos||[]).filter(Boolean);
- if(!photos.length&&r.photo)photos.push(r.photo);
- const figure=recordHiveFigure(r);
- return `<div class="record-swipe" data-record-id="${esc(r.id||"")}">
-   <button class="record-delete" type="button" onclick="deleteRecord('${esc(r.id||"")}')">削除</button>
-   <div class="record-b-card">
-   <div class="record-b-layout">
-     <div class="record-b-left ${cls[r.workType]||"record-color-inspection"}">
-       <div class="record-b-type">${labels[r.workType]||"作業"}</div>
-       <div class="record-b-date">${esc(r.date)}</div>
-     </div>
-     <div class="record-b-center">
-       <div class="record-b-hive-name">🐝 ${esc(h?.name||"削除済み")}</div>
-       <div class="record-b-title">${labels[r.workType]||"作業"}${r.workType==="inspection"?"（全体確認）":""}</div>
-       <div class="record-b-info">${details.join("")||'<div class="muted">記録内容なし</div>'}</div>
-     </div>
-     <div class="record-b-right">${figure}</div>
-   </div>
-   ${photos.length?`<div class="record-photos">${photos.map(p=>`<img class="photo-preview" src="${p}">`).join("")}</div>`:""}
- </div></div>`;
+  const h=data.hives.find(x=>x.id===r.hiveId);
+  const labels={inspection:"内見",harvest:"採蜜",addbox:"次箱",medicine:"薬設置",remove:"撤去",move:"移動"};
+  const cls={inspection:"record-color-inspection",harvest:"record-color-harvest",addbox:"record-color-addbox",medicine:"record-color-medicine",remove:"record-color-remove",move:"record-color-move"};
+  const details=[];
+
+  if(r.inspectionIncluded)details.push(`<div><b>内見</b>　作業後の状態を反映</div>`);
+
+  if(r.harvestBoxTiers?.length || r.harvestBoxes || r.harvestFlows?.length){
+    const hb=r.harvestBoxes||r.harvestBoxTiers?.length||0;
+    const hf=r.harvestFlows||[];
+    details.push(`<div><b>採蜜</b><div style="margin-left:0.5em">重箱　${hb}箱${hf.length?`<br>ハイブ　${hf.map(i=>`基${i+1}`).join("<br>　　　　")}`:""}</div></div>`);
+  }
+
+  if(r.addBoxes||r.addFlows){
+    details.push(`<div><b>次箱</b><div style="margin-left:0.5em">${r.addBoxes?`重箱　${r.addBoxes}段`:""}${r.addFlows?`${r.addBoxes?"<br>":""}ハイブ　${r.addFlows}基`:""}</div></div>`);
+  }
+
+  if(r.removeBoxTiers?.length)details.push(`<div><b>撤去</b>　重箱 ${r.removeBoxTiers.map(x=>`${x}段目`).join("、")}</div>`);
+  else if(r.removeBoxes)details.push(`<div><b>撤去</b>　重箱 ${r.removeBoxes}箱</div>`);
+  if(r.removeFlows?.length)details.push(`<div><b>撤去</b>　フローハイブ ${r.removeFlows.map(i=>`基${i+1}`).join("、")}</div>`);
+
+  if(r.movePlace)details.push(`<div><b>移動</b><div class="move-location">${esc(r.moveFromPlace||"未設定")}<br>↓<br>${esc(r.movePlace)}</div></div>`);
+  if(r.medicineName)details.push(`<div><b>薬</b>　${esc(r.medicineName)} ${esc(r.medicineAmount||"")}　${esc(r.medicinePlace||"")}</div>`);
+
+  // 給餌は必ず1か所だけ表示
+  const feedText=r.inspectionFeed||r.feed;
+  if(feedText)details.push(`<div><b>給餌</b>　${esc(feedText)}</div>`);
+
+  if(r.memo)details.push(`<div class="record-memo">${esc(r.memo)}</div>`);
+  const photos=(r.photos||[]).filter(Boolean);if(!photos.length&&r.photo)photos.push(r.photo);
+  const figure=recordHiveFigure(r);
+  const status=esc(r.status||h?.status||"未設定");
+  return `<div class="record-card ${cls[r.workType]||"record-color-inspection"}" data-id="${r.id}">
+    <div class="record-main">
+      <div class="record-date">${fmt(r.date)}<div class="record-work-label">${esc(r.workLabel||"")}</div></div>
+      <div class="record-body"><div class="record-b-section">作業の内容</div>${details.join("")}${r.memo?`<div class="record-b-section">メモ</div><div>${esc(r.memo)}</div>`:""}${photos.length?`<button class="photo-btn" onclick='openRecordPhotos(${JSON.stringify(r.id)})'>📷 写真を見る</button>`:""}</div>
+    </div>
+    ${h?`<div class="record-after">${figure}</div>`:""}
+  </div>`;
 }
 function records(m){const rs=[...data.records].sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));m.innerHTML=`<div class="row"><div><h2 style="margin:0">記録</h2><div class="muted">すべての作業に内検を含みます</div></div><button onclick="newRecord()">＋ 記録</button></div><div style="margin-top:14px">${rs.length?rs.map(recordCard).join(""):'<div class="card empty">まだ記録がありません。</div>'}</div>`}
 function newRecord(hiveId){
