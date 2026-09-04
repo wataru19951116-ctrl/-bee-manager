@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5b400">
-<meta name="bee-manager-version" content="V43">
+<meta name="bee-manager-version" content="V44">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -123,6 +123,7 @@ function home(m){
 }
 function hives(m){if(editingHive!==null){hiveForm(m);return}m.innerHTML=`<div class="row"><div><h2 style="margin:0">巣箱</h2><div class="muted">巣箱の状況は作業登録から更新します</div></div><button onclick="addHive()">＋ 追加</button></div><div style="margin-top:14px">${data.hives.length?data.hives.map(hiveCard).join(""):'<div class="card empty">まだ巣箱がありません。<br>「＋ 追加」から登録できます。</div>'}</div>`}
 function stackHtml(real,built){return Array.from({length:real},(_,i)=>`<div class="box-tier ${i<built?"built":""}">${i<built?"巣あり":"空段"}・${i+1}段目</div>`).join("")}
+function removeStackHtml(real,built){return Array.from({length:real},(_,i)=>`<div class="box-tier ${i<built?"built":""}" data-tier="${i+1}">${i<built?"巣あり":"空段"}・${i+1}段目</div>`).join("")}
 function harvestStackHtml(real,built,selected){
  return Array.from({length:built},(_,i)=>{
   const tier=i+1,chosen=selected.includes(tier);
@@ -268,7 +269,7 @@ function updateWorkArea(){
  const h=data.hives.find(x=>x.id===document.getElementById("rh")?.value);if(!h)return;
 
  // 次箱・撤去は「内見」の群の状態だけを表示
- const statusOnly=selectedWorks.some(x=>x==="addbox"||x==="remove")&&!selectedWorks.includes("inspectionOnly");
+ const statusOnly=selectedWorks.some(x=>x==="harvest"||x==="addbox"||x==="remove");
  if(statusOnly){
    area.innerHTML+=`<div class="work-register-section-title">内見</div><div class="card"><label>群の状態</label><select id="rs"><option ${h.status==="強群"?"selected":""}>強群</option><option ${h.status==="普通"?"selected":""}>普通</option><option ${h.status==="弱群"?"selected":""}>弱群</option><option ${!h.status||h.status==="未設定"?"selected":""}>未設定</option></select></div>`;
  }else if(selectedWorks.includes("inspection")){
@@ -286,7 +287,7 @@ function updateWorkArea(){
  }
  if(selectedWorks.includes("addbox"))area.innerHTML+=`<div class="work-register-section-title">次箱</div><div class="card"><label>追加する重箱の数</label><input id="addBoxes" type="number" min="0" value="0"><label>追加するフローハイブの基数</label><input id="addFlows" type="number" min="0" value="0"></div>`;
  if(selectedWorks.includes("medicine"))area.innerHTML+=`<div class="work-register-section-title">薬設置</div><div class="card"><label>薬の名前</label><input id="medicineName"><label>量</label><input id="medicineAmount"><label>設置場所</label><input id="medicinePlace"></div>`;
- if(selectedWorks.includes("remove"))area.innerHTML+=`<div class="work-register-section-title">撤去</div><div class="card"><label>撤去する重箱を図から選択</label><div class="box-stack" id="removeBoxes">${stackHtml(+h.realTiers||0,Math.min(+h.builtTiers||0,+h.realTiers||0),true)}</div>${h.flowCount?`<label>撤去するフローハイブ</label><div class="check-grid">${Array.from({length:h.flowCount},(_,i)=>`<label class="check"><input type="checkbox" class="remove-flow" value="${i}"> ${i+1}基目</label>`).join("")}</div>`:""}</div>`;
+ if(selectedWorks.includes("remove"))area.innerHTML+=`<div class="work-register-section-title">撤去</div><div class="card"><label>撤去する重箱を図から選択</label><div class="box-stack" id="removeBoxes">${removeStackHtml(+h.realTiers||0,Math.min(+h.builtTiers||0,+h.realTiers||0))}</div>${h.flowCount?`<label>撤去するフローハイブ</label><div class="check-grid">${Array.from({length:h.flowCount},(_,i)=>`<label class="check"><input type="checkbox" class="remove-flow" value="${i}"> ${i+1}基目</label>`).join("")}</div>`:""}</div>`;
 
  if(selectedWorks.includes("move"))area.innerHTML+=`<div class="work-register-section-title">移動</div><div class="card"><label>移動時の群の大きさ</label><input value="${esc(h.status||"未設定")}" readonly><label>移動後の群の場所</label><input id="movePlace" value="${esc(h.place||"")}"></div>`;
  updatePhotoFields();
@@ -412,4 +413,4 @@ document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{currentTab=b.
 </script>
 </body>
 </html><style>.nav button[data-tab="hives"]{display:none!important}.box-tier{cursor:pointer}.box-tier.selected{outline:3px solid #f5b400;background:#f5b400}</style>
-<script>function toggleWork(type){setWork(type)}document.addEventListener("click",function(e){const h=e.target.closest("#harvestBoxes .box-tier");if(h){toggleHarvestBox(+h.dataset.tier);}});</script><style>.box-tier{cursor:pointer}.box-tier.selected{outline:3px solid #f5b400;background:#f5b400}</style>
+<script>function toggleWork(type){setWork(type)}document.addEventListener("click",function(e){const h=e.target.closest("#harvestBoxes .box-tier");if(h){toggleHarvestBox(+h.dataset.tier);return;}const r=e.target.closest("#removeBoxes .box-tier");if(r){r.classList.toggle("selected");}});</script><style>.box-tier{cursor:pointer}.box-tier.selected{outline:3px solid #f5b400;background:#f5b400}</style>
