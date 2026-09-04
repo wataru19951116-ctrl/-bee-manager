@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5b400">
-<meta name="bee-manager-version" content="V41">
+<meta name="bee-manager-version" content="V40">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -110,7 +110,7 @@ const KEY="beeManagerV1";
 let data=JSON.parse(localStorage.getItem(KEY)||'{"hives":[],"records":[],"tasks":[]}');
 data.hives=(data.hives||[]).map(h=>({...h,realTiers:Number(h.realTiers||0),builtTiers:Number(h.builtTiers||0),flowHive:!!h.flowHive,flowCount:Number(h.flowCount||0),flowLevels:Array.isArray(h.flowLevels)?h.flowLevels:[]}));
 data.records=(data.records||[]).map((r,i)=>({...r,workType:r.workType||"inspection",realTiers:Number(r.realTiers||0),builtTiers:Number(r.builtTiers||0),flowHive:!!r.flowHive,flowCount:Number(r.flowCount||0),flowLevels:Array.isArray(r.flowLevels)?r.flowLevels:[],createdAt:Number(r.createdAt||i+1)}));
-let currentTab="home",editingHive=null,selectedHive=null,harvestSelectedCount=0,harvestFlowSelected=[];
+let currentTab="home",editingHive=null,selectedHive=null,harvestSelectedCount=0,harvestSelectedTiers=[],harvestFlowSelected=[];
 const save=()=>localStorage.setItem(KEY,JSON.stringify(data));
 const esc=s=>String(s??"").replace(/[&<>\"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const today=()=>new Date().toISOString().slice(0,10);
@@ -124,10 +124,10 @@ function home(m){
 function hives(m){if(editingHive!==null){hiveForm(m);return}m.innerHTML=`<div class="row"><div><h2 style="margin:0">巣箱</h2><div class="muted">巣箱の状況は作業登録から更新します</div></div><button onclick="addHive()">＋ 追加</button></div><div style="margin-top:14px">${data.hives.length?data.hives.map(hiveCard).join(""):'<div class="card empty">まだ巣箱がありません。<br>「＋ 追加」から登録できます。</div>'}</div>`}
 function stackHtml(real,built){return Array.from({length:real},(_,i)=>`<div class="box-tier ${i<built?"built":""}">${i<built?"巣あり":"空段"}・${i+1}段目</div>`).join("")}
 function harvestStackHtml(real,built,selected){
-  return Array.from({length:real},(_,i)=>{
-    const tier=i+1, chosen=selected.includes(tier);
-    return `<div class="box-tier ${i<built?"built":""}${chosen?" selected":""}" data-tier="${tier}" onclick="toggleHarvestBox(${tier})">${i<built?"巣あり":"空段"}・${tier}段目</div>`;
-  }).join("");
+ return Array.from({length:built},(_,i)=>{
+  const tier=i+1,chosen=selected.includes(tier);
+  return `<div class="box-tier built${chosen?" selected":""}" data-tier="${tier}">${tier}段目</div>`;
+ }).join("");
 }
 function flowHtml(h,onclickMode=true){return h.flowHive?`<div class="flow-wrap"><div class="flow-title">🍯 フローハイブ ${h.flowCount}基</div><div class="flow-row">${Array.from({length:h.flowCount},(_,i)=>flowMini(h,i,onclickMode)).join("")}</div></div>`:'<div class="hint" style="margin-top:10px">フローハイブ：なし</div>'}
 function flowMini(h,i,clickable=true){const level=(h.flowLevels||[])[i]||"空";return `<div class="flow-item" ${clickable?`onclick="cycleFlow('${h.id}',${i})"`:""}><div class="flow-frame" data-level="${esc(level)}"><div class="honey"></div></div><div class="flow-label">基 ${i+1}</div><div class="flow-level">${esc(level)}</div></div>`}
@@ -240,7 +240,7 @@ function newRecord(hiveId){
  <button style="width:100%;margin-top:14px" onclick="saveRecord()">記録する</button>`;
  document.getElementById("rh").onchange=updateRecordHive;updateRecordHive();
 }
-function updateRecordHive(){const h=data.hives.find(x=>x.id===document.getElementById("rh").value);if(!h)return;const ia=document.getElementById("inspectionArea");if(ia)ia.innerHTML="";harvestSelectedCount=0;harvestFlowSelected=[];updateFlowRecord();updateWorkArea();updatePhotoFields()}
+function updateRecordHive(){const h=data.hives.find(x=>x.id===document.getElementById("rh").value);if(!h)return;const ia=document.getElementById("inspectionArea");if(ia)ia.innerHTML="";harvestSelectedCount=0;harvestSelectedTiers=[];harvestFlowSelected=[];updateFlowRecord();updateWorkArea();updatePhotoFields()}
 function setWork(type){
  if(!Array.isArray(selectedWorks))selectedWorks=["inspection"];
  if(!selectedWorks.includes("inspection"))selectedWorks.unshift("inspection");
@@ -255,58 +255,41 @@ function toggleHarvestBox(tier){
  const h=data.hives.find(x=>x.id===document.getElementById("rh")?.value);if(!h)return;
  const built=Math.min(+h.builtTiers||0,+h.realTiers||0);
  if(tier<1||tier>built)return;
- if(harvestSelectedTiers.includes(tier)){
-   harvestSelectedTiers=harvestSelectedTiers.filter(x=>x!==tier);
- }else{
-   harvestSelectedTiers.push(tier);
-   harvestSelectedTiers.sort((a,b)=>a-b);
- }
+ if(harvestSelectedTiers.includes(tier)) harvestSelectedTiers=harvestSelectedTiers.filter(x=>x!==tier);
+ else harvestSelectedTiers.push(tier);
+ harvestSelectedTiers.sort((a,b)=>a-b);
  harvestSelectedCount=harvestSelectedTiers.length;
  updateWorkArea();
 }
-function tapHarvestFlow(i){
- const h=data.hives.find(x=>x.id===document.getElementById("rh")?.value);if(!h)return;
- const level=(h.flowLevels||[])[i]||"空";
- if(!harvestFlowSelected.includes(i)&&level==="空")return;
- if(harvestFlowSelected.includes(i))harvestFlowSelected=harvestFlowSelected.filter(x=>x!==i);
- else harvestFlowSelected.push(i);
- updateWorkArea();
-}
+function tapHarvestFlow(i){const h=data.hives.find(x=>x.id===document.getElementById("rh")?.value);if(!h)return;const level=(h.flowLevels||[])[i]||"空";if(level==="空"&&!harvestFlowSelected.includes(i))return;if(harvestFlowSelected.includes(i)){harvestFlowSelected=harvestFlowSelected.filter(x=>x!==i);updateWorkArea();return}harvestFlowSelected.push(i);updateWorkArea()}
 function updateWorkArea(){
  const area=document.getElementById("workArea"),feed=document.getElementById("feedArea");if(!area)return;
  area.innerHTML="";if(feed)feed.innerHTML="";
  const h=data.hives.find(x=>x.id===document.getElementById("rh")?.value);if(!h)return;
 
- const statusOnly=(selectedWorks.includes("addbox")||selectedWorks.includes("remove"))&&!selectedWorks.includes("inspection");
+ // 次箱・撤去は「内見」の群の状態だけを表示
+ const statusOnly=selectedWorks.some(x=>x==="addbox"||x==="remove")&&!selectedWorks.includes("inspectionOnly");
  if(statusOnly){
-   area.innerHTML+=`<div class="work-register-section-title">内見</div><div class="card"><label>群の状態</label><select id="rs"><option ${h.status==="強群"?"selected":""}>強群</option><option ${h.status==="普通"?"selected":""}>普通</option><option ${h.status==="弱群"?"selected":""}>弱群</option><option ${!h.status||h.status==="未設定"?"selected":""}>未設定</option></select></div>`;
- }
-
- if(selectedWorks.includes("inspection") && selectedWorks.includes("harvest")){
    area.innerHTML+=`<div class="work-register-section-title">内見</div><div class="card"><label>群の状態</label><select id="rs"><option ${h.status==="強群"?"selected":""}>強群</option><option ${h.status==="普通"?"selected":""}>普通</option><option ${h.status==="弱群"?"selected":""}>弱群</option><option ${!h.status||h.status==="未設定"?"selected":""}>未設定</option></select></div>`;
  }else if(selectedWorks.includes("inspection")){
    const flowSection=h.flowHive&&Number(h.flowCount||0)?`<label>フローハイブ貯蜜状況</label><div class="flow-row">${Array.from({length:Number(h.flowCount||0)},(_,i)=>{const level=(h.flowLevels||[])[i]||"空";return `<div class="flow-item"><div class="flow-frame" id="rf${i}" data-level="${esc(level)}" onclick="cycleRecordFlow(${i})"><div class="honey"></div></div><div class="flow-label">基 ${i+1}</div><div class="flow-level" id="rfl${i}">${esc(level)}</div></div>`}).join("")}</div><div class="hint">タップするたびに「空 → 少ない → 半分 → 多い → 満杯」と変わります。</div>`:"";
    area.innerHTML+=`<div class="work-register-section-title">内見</div><div class="card"><label>群の状態</label><select id="rs"><option ${h.status==="強群"?"selected":""}>強群</option><option ${h.status==="普通"?"selected":""}>普通</option><option ${h.status==="弱群"?"selected":""}>弱群</option><option ${!h.status||h.status==="未設定"?"selected":""}>未設定</option></select><label>巣あり段数（上から）</label><input id="rbuilt" type="number" min="0" max="${h.realTiers||0}" value="${h.builtTiers||0}">${flowSection}</div>`;
  }
-
  if(selectedWorks.includes("inspection")&&selectedWorks.length===1){
    feed.innerHTML=`<div class="work-register-section-title">給餌</div><div class="card"><div class="check-grid"><label class="check"><input id="feedWater" type="checkbox">水</label><label class="check"><input id="feedFood" type="checkbox">餌</label></div></div>`;
  }
-
  if(selectedWorks.includes("harvest")){
    const realTiers=+h.realTiers||0,builtTiers=Math.min(+h.builtTiers||0,realTiers);
    harvestSelectedTiers=harvestSelectedTiers.filter(t=>t>=1&&t<=builtTiers);
    harvestSelectedCount=harvestSelectedTiers.length;
-   area.innerHTML+=`<div class="work-register-section-title">採蜜</div><div class="card"><label>採蜜する重箱を図から選択</label><div class="hint">採蜜する箱をタップすると選択、もう一度タップすると解除できます。</div><div class="box-stack" id="harvestBoxes">${harvestStackHtml(realTiers,builtTiers,harvestSelectedTiers)}</div><div class="hint">採蜜する箱：${harvestSelectedCount}箱</div>${harvestFlowHtml(h)}</div>`;
+   area.innerHTML+=`<div class="work-register-section-title">採蜜</div><div class="card"><label>採蜜する重箱を図から選択</label><div class="hint">箱をタップすると選択、もう一度タップすると解除できます。</div><div class="box-stack" id="harvestBoxes">${harvestStackHtml(realTiers,builtTiers,harvestSelectedTiers)}</div><div class="hint">採蜜する箱：${harvestSelectedCount}箱</div>${harvestFlowHtml(h)}</div>`;
  }
-
  if(selectedWorks.includes("addbox"))area.innerHTML+=`<div class="work-register-section-title">次箱</div><div class="card"><label>追加する重箱の数</label><input id="addBoxes" type="number" min="0" value="0"><label>追加するフローハイブの基数</label><input id="addFlows" type="number" min="0" value="0"></div>`;
  if(selectedWorks.includes("medicine"))area.innerHTML+=`<div class="work-register-section-title">薬設置</div><div class="card"><label>薬の名前</label><input id="medicineName"><label>量</label><input id="medicineAmount"><label>設置場所</label><input id="medicinePlace"></div>`;
  if(selectedWorks.includes("remove"))area.innerHTML+=`<div class="work-register-section-title">撤去</div><div class="card"><label>撤去する重箱を図から選択</label><div class="box-stack" id="removeBoxes">${stackHtml(+h.realTiers||0,Math.min(+h.builtTiers||0,+h.realTiers||0),true)}</div>${h.flowCount?`<label>撤去するフローハイブ</label><div class="check-grid">${Array.from({length:h.flowCount},(_,i)=>`<label class="check"><input type="checkbox" class="remove-flow" value="${i}"> ${i+1}基目</label>`).join("")}</div>`:""}</div>`;
  if(selectedWorks.includes("move"))area.innerHTML+=`<div class="work-register-section-title">移動</div><div class="card"><label>移動時の群の大きさ</label><input value="${esc(h.status||"未設定")}" readonly><label>移動後の群の場所</label><input id="movePlace" value="${esc(h.place||"")}"></div>`;
  updatePhotoFields();
 }
-
 function updatePhotoFields(){
  const area=document.getElementById("photoArea");if(!area)return;
  const multi=selectedWorks.length>1,h=data.hives.find(x=>x.id===document.getElementById("rh")?.value),flow=!!h?.flowHive;let groups=[];
@@ -428,3 +411,4 @@ document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{currentTab=b.
 </script>
 </body>
 </html><style>.nav button[data-tab="hives"]{display:none!important}.box-tier{cursor:pointer}.box-tier.selected{outline:3px solid #f5b400;background:#f5b400}</style>
+<script>function toggleWork(type){setWork(type)}document.addEventListener("click",function(e){const h=e.target.closest("#harvestBoxes .box-tier");if(h){toggleHarvestBox(+h.dataset.tier);}});</script><style>.box-tier{cursor:pointer}.box-tier.selected{outline:3px solid #f5b400;background:#f5b400}</style>
