@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5b400">
-<meta name="bee-manager-version" content="V56">
+<meta name="bee-manager-version" content="V57">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -516,7 +516,7 @@ document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{currentTab=b.
 .backup-head h2{margin:0;font-size:20px}.backup-close{width:auto;background:#eee;padding:8px 12px}
 .backup-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px}
 .backup-card h3{font-size:16px;margin:0 0 6px}.backup-card p{font-size:12px;line-height:1.6;color:#666;margin:0 0 12px}
-.backup-card button{width:100%}.backup-restore{background:#eee}.backup-note{font-size:11px;color:#777;line-height:1.55;margin-top:8px}
+.backup-card button{width:100%}.backup-restore{background:#eee}.backup-danger-button{width:100%;background:#fff0ef;color:#b42318;border:1px solid #f2b8b5;margin-top:6px}.backup-danger-all{background:#d9534f;color:#fff;border-color:#d9534f;margin-top:16px}.backup-note{font-size:11px;color:#777;line-height:1.55;margin-top:8px}
 </style>
 <div id="backupModal" class="backup-modal hidden" onclick="if(event.target===this)closeBackupSettings()">
   <div class="backup-panel">
@@ -533,6 +533,14 @@ document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{currentTab=b.
       <button class="backup-restore" onclick="document.getElementById('beeBackupFile').click()">バックアップを選ぶ</button>
       <input id="beeBackupFile" type="file" accept=".json,application/json" class="hidden" onchange="importBeeBackup(this.files&&this.files[0]);this.value=''">
       <div class="backup-note danger">復元すると、現在この端末に入っているデータはバックアップの内容に置き換わります。</div>
+    </div>
+    <div class="backup-card">
+      <h3>🗑️ データ削除</h3>
+      <p>不要になったデータを端末から削除します。削除したデータは、バックアップがない限り元に戻せません。</p>
+      <button class="backup-danger-button" onclick="deleteDiscardedHiveData()">過去に削除された群のデータを削除</button>
+      <div class="backup-note">「群を破棄」した群本体と、その群に紐づく作業記録・予定を完全に削除します。現在管理中の群には影響しません。</div>
+      <button class="backup-danger-button backup-danger-all" onclick="deleteAllBeeData()">全てのデータを削除</button>
+      <div class="backup-note danger">巣箱・作業記録・予定・写真など、Beeレコード内の全データを初期状態に戻します。</div>
     </div>
   </div>
 </div>
@@ -576,6 +584,27 @@ async function importBeeBackup(file){
   }catch(e){
     alert("このファイルはBeeレコードのバックアップとして読み込めません。");
   }
+}
+
+function deleteDiscardedHiveData(){
+  const discarded=(data.hives||[]).filter(h=>h.discarded);
+  if(!discarded.length){alert("過去に削除された群のデータはありません。");return;}
+  const names=discarded.map(h=>h.name||"名称未設定").join("、");
+  if(!confirm(`過去に削除された群のデータを完全に削除しますか？\n\n対象：${discarded.length}群\n${names}\n\nこの操作は元に戻せません。`))return;
+  if(!confirm("本当に削除しますか？\n\n削除された群と、その群に紐づく作業記録・予定も完全に削除されます。"))return;
+  const ids=new Set(discarded.map(h=>String(h.id)));
+  data.hives=(data.hives||[]).filter(h=>!ids.has(String(h.id)));
+  data.records=(data.records||[]).filter(r=>!ids.has(String(r.hiveId)));
+  data.tasks=(data.tasks||[]).filter(t=>!ids.has(String(t.hiveId)));
+  save(); closeBackupSettings(); render();
+  alert(`${discarded.length}群の過去データを削除しました。`);
+}
+function deleteAllBeeData(){
+  if(!confirm("Beeレコードの全てのデータを削除しますか？\n\n巣箱・作業記録・予定・写真など、端末内の全データが削除されます。"))return;
+  if(!confirm("最終確認です。\n\nこの操作は元に戻せません。バックアップを保存していない場合、復元できません。\n\n本当に全て削除しますか？"))return;
+  data={hives:[],records:[],tasks:[]};
+  save(); closeBackupSettings(); render();
+  alert("全てのデータを削除しました。");
 }
 </script>
 

@@ -1,4 +1,4 @@
-const CACHE = "bee-record-v56";
+const CACHE = "bee-record-v57";
 const CORE = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", event => {
