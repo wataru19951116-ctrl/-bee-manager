@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5b400">
-<meta name="bee-manager-version" content="V44">
+<meta name="bee-manager-version" content="V45">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -289,7 +289,7 @@ function updateWorkArea(){
  if(selectedWorks.includes("medicine"))area.innerHTML+=`<div class="work-register-section-title">薬設置</div><div class="card"><label>薬の名前</label><input id="medicineName"><label>量</label><input id="medicineAmount"><label>設置場所</label><input id="medicinePlace"></div>`;
  if(selectedWorks.includes("remove"))area.innerHTML+=`<div class="work-register-section-title">撤去</div><div class="card"><label>撤去する重箱を図から選択</label><div class="box-stack" id="removeBoxes">${removeStackHtml(+h.realTiers||0,Math.min(+h.builtTiers||0,+h.realTiers||0))}</div>${h.flowCount?`<label>撤去するフローハイブ</label><div class="check-grid">${Array.from({length:h.flowCount},(_,i)=>`<label class="check"><input type="checkbox" class="remove-flow" value="${i}"> ${i+1}基目</label>`).join("")}</div>`:""}</div>`;
 
- if(selectedWorks.includes("move"))area.innerHTML+=`<div class="work-register-section-title">移動</div><div class="card"><label>移動時の群の大きさ</label><input value="${esc(h.status||"未設定")}" readonly><label>移動後の群の場所</label><input id="movePlace" value="${esc(h.place||"")}"></div>`;
+ if(selectedWorks.includes("move"))area.innerHTML+=`<div class="work-register-section-title">移動</div><div class="card"><label>移動後の群の場所</label><input id="movePlace" value="${esc(h.place||"")}"></div>`;
  updatePhotoFields();
 }
 function updatePhotoFields(){
