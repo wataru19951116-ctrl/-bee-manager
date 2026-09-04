@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5b400">
-<meta name="bee-manager-version" content="V48">
+<meta name="bee-manager-version" content="V52">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -230,7 +230,8 @@ function recordCard(r){
   </div>
  </div>`;
 }
-function records(m){const rs=[...data.records].sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));m.innerHTML=`<div class="row"><div><h2 style="margin:0">記録</h2><div class="muted">すべての作業に内検を含みます</div></div><button onclick="newRecord()">＋ 記録</button></div><div style="margin-top:14px">${rs.length?rs.map(recordCard).join(""):'<div class="card empty">まだ記録がありません。</div>'}</div>`}
+// V52: 20件制限は「記録」タブの一覧だけ。予定カレンダーとホーム→群の詳細→作業履歴は全件表示。
+function records(m){const rs=[...data.records].sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0)).slice(0,20);m.innerHTML=`<div class="row"><div><h2 style="margin:0">記録</h2><div class="muted">すべての作業に内検を含みます</div></div><button onclick="newRecord()">＋ 記録</button></div><div style="margin-top:14px">${rs.length?rs.map(recordCard).join(""):'<div class="card empty">まだ記録がありません。</div>'}</div>`}
 function newRecord(hiveId,presetWork,taskId){
  const m=document.getElementById("main");currentTab="records";
  const h=data.hives.find(x=>x.id===hiveId)||data.hives[0];
@@ -396,21 +397,29 @@ function taskCard(t){
  const h=data.hives.find(x=>x.id===t.hiveId),type=t.workType||"other",label=t.workLabel||workLabel(type);
  return `<div class="task-card ${t.done?"task-done":""}"><div class="task-time">${t.time||taskDateLabel(t.date)}</div><div class="task-main"><div class="task-title">${esc(label)}</div><div class="task-meta">${h?esc(h.name):"巣箱未指定"}</div>${t.memo?`<div class="task-memo">${esc(t.memo)}</div>`:""}</div><div class="task-actions">${t.done?`<button class="secondary" onclick="toggleTaskDone('${t.id}')">完了を戻す</button>`:(type!=="other"&&h?`<button class="task-record" onclick="startTaskRecord('${t.id}')">この予定から記録する</button>`:`<button class="secondary" onclick="toggleTaskDone('${t.id}')">完了</button>`)}<button class="secondary" onclick="deleteTask('${t.id}')">削除</button></div></div>`;
 }
-function scheduleRecordCard(r){
- const h=data.hives.find(x=>x.id===r.hiveId),label=workLabel(r.workType||"inspection");
- return `<div class="day-record-card"><div class="day-record-title">${esc(label)}</div><div class="day-record-meta">${h?esc(h.name):"巣箱未指定"}</div>${r.memo?`<div class="day-record-memo"><b>メモ：</b>${esc(r.memo)}</div>`:""}</div>`;
-}
+function scheduleRecordCard(r){return recordCard(r)}
 function calendar(m){
  data.tasks=(data.tasks||[]).map((t,i)=>({...t,id:t.id||`legacy-${i}-${t.date||""}`,workType:t.workType||"other",memo:t.memo||t.name||"",done:!!t.done}));
+ // 完了から24時間経過した予定は自動削除。既存の完了予定は、この版で初めて見た時刻を完了時刻として扱う。
+ const now=Date.now();let taskChanged=false;
+ data.tasks=data.tasks.filter(t=>{
+  if(!t.done)return true;
+  if(!t.completedAt){t.completedAt=now;taskChanged=true;return true}
+  if(now-Number(t.completedAt)>=24*60*60*1000){taskChanged=true;return false}
+  return true;
+ });
+ if(taskChanged)save();
  if(scheduleEditing){scheduleForm(m);return}
  const tasks=[...data.tasks].sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.time||"").localeCompare(b.time||""));const td=today();
- const todays=tasks.filter(t=>!t.done&&t.date===td),future=tasks.filter(t=>!t.done&&t.date>td),past=tasks.filter(t=>!t.done&&t.date<td),done=tasks.filter(t=>t.done).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+ const todays=tasks.filter(t=>!t.done&&t.date===td),past=tasks.filter(t=>!t.done&&t.date<td),done=tasks.filter(t=>t.done).sort((a,b)=>Number(b.completedAt||0)-Number(a.completedAt||0));
  const section=(title,arr)=>`<div class="schedule-section"><b>${title}</b><span class="count-pill">${arr.length}件</span></div>${arr.length?arr.map(taskCard).join(""):'<div class="card schedule-empty">予定はありません</div>'}`;
+ // カレンダーは記録ページの20件制限とは別に、全作業記録を参照する。
  const records=[...(data.records||[])];
  const selectedTasks=scheduleSelectedDate?tasks.filter(t=>t.date===scheduleSelectedDate):[];
  const selectedRecords=scheduleSelectedDate?records.filter(r=>r.date===scheduleSelectedDate).sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0)):[];
  const selectedBlock=scheduleSelectedDate?`<div class="selected-day-head"><b>${taskDateLabel(scheduleSelectedDate)}</b><span class="count-pill">予定 ${selectedTasks.length}件 / 記録 ${selectedRecords.length}件</span></div><div class="selected-day-subhead"><b>予定</b><span class="count-pill">${selectedTasks.length}件</span></div>${selectedTasks.length?selectedTasks.map(taskCard).join(""):`<div class="card schedule-empty">この日の予定はありません</div>`}<div class="selected-day-subhead"><b>作業記録</b><span class="count-pill">${selectedRecords.length}件</span></div>${selectedRecords.length?selectedRecords.map(scheduleRecordCard).join(""):`<div class="card schedule-empty">この日の作業記録はありません</div>`}`:"";
- m.innerHTML=`<div class="schedule-head"><div><h2>📅 予定</h2><div class="schedule-sub">これからの作業を管理しましょう</div></div><button class="schedule-add" onclick="openScheduleForm()">＋ 予定</button></div>${monthCalendar(tasks,records)}${selectedBlock}${past.length?section("期限を過ぎた予定",past):""}${section("今日の予定",todays)}${section("今後の予定",future)}${done.length?section("完了した予定",done):""}`;
+ m.innerHTML=`<div class="schedule-head"><div><h2>📅 予定</h2><div class="schedule-sub">これからの作業を管理しましょう</div></div><button class="schedule-add" onclick="openScheduleForm()">＋ 予定</button></div>${monthCalendar(tasks,records)}${selectedBlock}${past.length?section("期限を過ぎた予定",past):""}${section("今日の予定",todays)}${done.length?section("完了した予定",done):""}`;
+ initRecordSwipe();
 }
 function openScheduleForm(){scheduleEditing=true;scheduleWork="inspection";render()}
 function closeScheduleForm(){scheduleEditing=false;render()}
