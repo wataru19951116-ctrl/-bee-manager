@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5b400">
-<meta name="bee-manager-version" content="V39">
+<meta name="bee-manager-version" content="V40">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -165,25 +165,36 @@ function recordCard(r){
  const labels={inspection:"内見",harvest:"採蜜",addbox:"次箱",medicine:"薬設置",remove:"撤去",move:"移動"};
  const cls={inspection:"record-color-inspection",harvest:"record-color-harvest",addbox:"record-color-addbox",medicine:"record-color-medicine",remove:"record-color-remove",move:"record-color-move"};
  const details=[];
+
  if(r.harvestBoxTiers?.length || r.harvestBoxes || r.harvestFlows?.length){
    const hb=r.harvestBoxes||r.harvestBoxTiers?.length||0;
    const hf=r.harvestFlows||[];
    details.push(`<div><b>採蜜</b><div style="margin-left:0.5em">重箱　　${hb}箱${hf.length?`<br>ハイブ　${hf.length}基`:""}</div></div>`);
  }
- // 給餌は保存形式がinspectionFeed/feedのどちらでも1回だけ表示
+
  const feedText=r.inspectionFeed||r.feed;
  if(feedText)details.push(`<div><b>給餌</b>　${esc(feedText)}</div>`);
+
  if(r.addBoxes||r.addFlows){
-   details.push(`<div><b>次箱</b><div style="margin-left:0.5em">${r.addBoxes?`重箱　${r.addBoxes}段`:""}${r.addFlows?`${r.addBoxes?`<br>`:``}ハイブ　${r.addFlows}基`:``}</div></div>`);
+   details.push(`<div><b>次箱</b><div style="margin-left:0.5em">${r.addBoxes?`重箱　　${r.addBoxes}段`:""}${r.addFlows?`${r.addBoxes?`<br>`:``}ハイブ　${r.addFlows}基`:``}</div></div>`);
  }
- if(r.removeBoxTiers?.length)details.push(`<div><b>撤去</b>　重箱 ${r.removeBoxTiers.map(x=>`${x}段目`).join("、")}</div>`);
- else if(r.removeBoxes)details.push(`<div><b>撤去</b>　重箱 ${r.removeBoxes}箱</div>`);
- if(r.removeFlows?.length)details.push(`<div><b>撤去</b>　フローハイブ ${r.removeFlows.map(i=>`基${i+1}`).join("、")}</div>`);
+
+ if(r.medicineName || r.medicineAmount || r.medicinePlace){
+   details.push(`<div><b>薬設置</b><div style="margin-left:0.5em">薬名　${esc(r.medicineName||"")}<br>量　　${esc(r.medicineAmount||"")}<br>場所　${esc(r.medicinePlace||"")}</div></div>`);
+ }
+
+ if(r.removeBoxTiers?.length || r.removeBoxes || r.removeFlows?.length){
+   const rb=r.removeBoxes||r.removeBoxTiers?.length||0;
+   const rf=r.removeFlows||[];
+   details.push(`<div><b>撤去</b><div style="margin-left:0.5em">${rb?`重箱　${rb}段`:""}${rf.length?`${rb?"<br>":""}ハイブ　${rf.length}基`:""}</div></div>`);
+ }
+
  if(r.movePlace)details.push(`<div><b>移動</b><div class="move-location">${esc(r.moveFromPlace||"未設定")}<br>↓<br>${esc(r.movePlace)}</div></div>`);
- if(r.medicineName)details.push(`<div><b>薬</b>　${esc(r.medicineName)} ${esc(r.medicineAmount||"")}　${esc(r.medicinePlace||"")}</div>`);
+
  const photos=(r.photos||[]).filter(Boolean);if(!photos.length&&r.photo)photos.push(r.photo);
  const figure=recordHiveFigure(r);
  const status=esc(r.status||h?.status||"未設定");
+
  return `<div class="record-swipe" data-record-id="${esc(r.id||"")}">
   <button class="record-delete" type="button" onclick="deleteRecord('${esc(r.id||"")}')">削除</button>
   <div class="record-b-card">
