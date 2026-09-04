@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5b400">
-<meta name="bee-manager-version" content="V47">
+<meta name="bee-manager-version" content="V48">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -95,7 +95,7 @@ input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radiu
 </style>
 
 <style id="v47-schedule-only">
-.schedule-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.schedule-head h2{margin:0}.schedule-sub{font-size:12px;color:var(--muted);margin-top:3px}.schedule-add{padding:10px 14px}.week-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:18px}.week-month{text-align:center;font-weight:800;margin-bottom:10px}.week-row{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}.week-day{font-size:10px;color:#777}.week-date{height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;position:relative}.week-date.today{background:var(--accent);font-weight:800}.week-date.has-task:after{content:"";width:5px;height:5px;border-radius:50%;background:#9b6b32;position:absolute;bottom:1px}.schedule-section{display:flex;align-items:center;justify-content:space-between;margin:17px 2px 8px}.schedule-section b{font-size:16px}.count-pill{font-size:11px;background:#eee;padding:5px 9px;border-radius:99px}.task-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:9px;display:grid;grid-template-columns:50px minmax(0,1fr);gap:10px;align-items:center}.task-time{text-align:center;font-size:12px;font-weight:800}.task-main{min-width:0}.task-title{font-weight:800;font-size:15px}.task-meta{font-size:12px;color:#666;margin-top:3px}.task-memo{font-size:11px;color:#777;margin-top:3px}.task-actions{grid-column:1/-1;display:flex;gap:7px}.task-actions button{flex:1;padding:9px;font-size:12px}.task-record{background:var(--accent);color:#222}.task-done{opacity:.58}.schedule-form-title{margin:0 0 12px}.schedule-form .card{margin-bottom:10px}.schedule-work-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.schedule-work-grid button{background:#eee;padding:12px 8px;font-size:13px}.schedule-work-grid button.selected{background:var(--accent)}.schedule-save{width:100%;margin-top:12px}.schedule-empty{text-align:center;padding:22px;color:#777}
+.schedule-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.schedule-head h2{margin:0}.schedule-sub{font-size:12px;color:var(--muted);margin-top:3px}.schedule-add{padding:10px 14px}.week-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:18px}.week-month{text-align:center;font-weight:800;margin-bottom:10px}.week-row{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}.week-day{font-size:10px;color:#777}.week-date{height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;position:relative}.week-date.today{background:var(--accent);font-weight:800}.week-date.has-task:after{content:"";width:5px;height:5px;border-radius:50%;background:#9b6b32;position:absolute;bottom:1px}.schedule-section{display:flex;align-items:center;justify-content:space-between;margin:17px 2px 8px}.schedule-section b{font-size:16px}.count-pill{font-size:11px;background:#eee;padding:5px 9px;border-radius:99px}.task-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:9px;display:grid;grid-template-columns:50px minmax(0,1fr);gap:10px;align-items:center}.task-time{text-align:center;font-size:12px;font-weight:800}.task-main{min-width:0}.task-title{font-weight:800;font-size:15px}.task-meta{font-size:12px;color:#666;margin-top:3px}.task-memo{font-size:11px;color:#777;margin-top:3px}.task-actions{grid-column:1/-1;display:flex;gap:7px}.task-actions button{flex:1;padding:9px;font-size:12px}.task-record{background:var(--accent);color:#222}.task-done{opacity:.58}.schedule-form-title{margin:0 0 12px}.schedule-form .card{margin-bottom:10px}.schedule-work-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.schedule-work-grid button{background:#eee;padding:12px 8px;font-size:13px}.schedule-work-grid button.selected{background:var(--accent)}.schedule-save{width:100%;margin-top:12px}.schedule-empty{text-align:center;padding:22px;color:#777}.month-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.month-nav button{background:#eee;padding:7px 11px;font-size:13px}.month-title{font-weight:800}.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}.month-cell{height:38px;display:flex;align-items:center;justify-content:center;position:relative;border-radius:10px;font-size:13px}.month-cell.blank{visibility:hidden}.month-cell.today{background:var(--accent);font-weight:800}.month-cell.has-task:after{content:"";width:5px;height:5px;border-radius:50%;background:#9b6b32;position:absolute;bottom:3px}
 </style>
 </head>
 <body>
@@ -114,7 +114,7 @@ const KEY="beeManagerV1";
 let data=JSON.parse(localStorage.getItem(KEY)||'{"hives":[],"records":[],"tasks":[]}');
 data.hives=(data.hives||[]).map(h=>({...h,realTiers:Number(h.realTiers||0),builtTiers:Number(h.builtTiers||0),flowHive:!!h.flowHive,flowCount:Number(h.flowCount||0),flowLevels:Array.isArray(h.flowLevels)?h.flowLevels:[]}));
 data.records=(data.records||[]).map((r,i)=>({...r,workType:r.workType||"inspection",realTiers:Number(r.realTiers||0),builtTiers:Number(r.builtTiers||0),flowHive:!!r.flowHive,flowCount:Number(r.flowCount||0),flowLevels:Array.isArray(r.flowLevels)?r.flowLevels:[],createdAt:Number(r.createdAt||i+1)}));
-let currentTab="home",editingHive=null,selectedHive=null,harvestSelectedCount=0,harvestSelectedTiers=[],harvestFlowSelected=[],scheduleEditing=false,scheduleWork="inspection",activeTaskId=null;
+let currentTab="home",editingHive=null,selectedHive=null,harvestSelectedCount=0,harvestSelectedTiers=[],harvestFlowSelected=[],scheduleEditing=false,scheduleWork="inspection",activeTaskId=null,scheduleMonthOffset=0;
 const save=()=>localStorage.setItem(KEY,JSON.stringify(data));
 const esc=s=>String(s??"").replace(/[&<>\"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const today=()=>new Date().toISOString().slice(0,10);
@@ -222,7 +222,7 @@ function recordCard(r){
      <div class="record-b-section">群の状況</div>
      <div class="record-b-value">${status}</div>
      <div class="record-b-section">作業の内容</div>
-     <div class="record-b-work">${details.join("")||'<div class="muted">記録内容なし</div>'}</div>
+     <div class="record-b-work">${details.join("")||'<div class="muted">記録内容なし</div>'}${r.memo?`<div style="margin-top:7px"><b>メモ</b><div>${esc(r.memo)}</div></div>`:""}</div>
      ${photos.length?`<button class="record-photo-button" type="button" onclick="openRecordPhotos('${esc(r.id||"")}')">📷 写真を見る（${photos.length}枚）</button>`:""}
     </div>
     <div class="record-b-right">${figure}</div>
@@ -376,12 +376,19 @@ async function saveRecord(){
  });
 }
 function taskDateLabel(d){try{return new Date(d+"T00:00:00").toLocaleDateString("ja-JP",{month:"numeric",day:"numeric",weekday:"short"})}catch(e){return d}}
-function weekStrip(tasks){
- const now=new Date(),day=now.getDay(),sun=new Date(now);sun.setDate(now.getDate()-day);
- const days=Array.from({length:7},(_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return d});
- const names=["日","月","火","水","木","金","土"];
- return `<div class="week-card"><div class="week-month">${now.getFullYear()}年 ${now.getMonth()+1}月</div><div class="week-row">${days.map((d,i)=>`<div><div class="week-day">${names[i]}</div><div class="week-date ${d.toDateString()===now.toDateString()?"today":""} ${tasks.some(t=>t.date===d.toISOString().slice(0,10)&&!t.done)?"has-task":""}">${d.getDate()}</div></div>`).join("")}</div></div>`;
+function monthCalendar(tasks){
+ const base=new Date();base.setDate(1);base.setMonth(base.getMonth()+scheduleMonthOffset);
+ const y=base.getFullYear(),mo=base.getMonth(),first=new Date(y,mo,1).getDay(),last=new Date(y,mo+1,0).getDate();
+ const names=["日","月","火","水","木","金","土"],td=today();
+ const cells=Array.from({length:first},()=>`<div class="month-cell blank"></div>`);
+ for(let d=1;d<=last;d++){
+  const ds=`${y}-${String(mo+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+  const has=tasks.some(t=>t.date===ds&&!t.done);
+  cells.push(`<div class="month-cell ${ds===td?"today":""} ${has?"has-task":""}">${d}</div>`);
+ }
+ return `<div class="week-card"><div class="month-nav"><button type="button" onclick="changeScheduleMonth(-1)">◀</button><div class="month-title">${y}年 ${mo+1}月</div><button type="button" onclick="changeScheduleMonth(1)">▶</button></div><div class="month-grid">${names.map(n=>`<div class="week-day">${n}</div>`).join("")}${cells.join("")}</div></div>`;
 }
+function changeScheduleMonth(n){scheduleMonthOffset+=n;render()}
 function taskCard(t){
  const h=data.hives.find(x=>x.id===t.hiveId),type=t.workType||"other",label=t.workLabel||workLabel(type);
  return `<div class="task-card ${t.done?"task-done":""}"><div class="task-time">${t.time||taskDateLabel(t.date)}</div><div class="task-main"><div class="task-title">${esc(label)}</div><div class="task-meta">${h?esc(h.name):"巣箱未指定"}</div>${t.memo?`<div class="task-memo">${esc(t.memo)}</div>`:""}</div><div class="task-actions">${t.done?`<button class="secondary" onclick="toggleTaskDone('${t.id}')">完了を戻す</button>`:(type!=="other"&&h?`<button class="task-record" onclick="startTaskRecord('${t.id}')">この予定から記録する</button>`:`<button class="secondary" onclick="toggleTaskDone('${t.id}')">完了</button>`)}<button class="secondary" onclick="deleteTask('${t.id}')">削除</button></div></div>`;
@@ -392,7 +399,7 @@ function calendar(m){
  const tasks=[...data.tasks].sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.time||"").localeCompare(b.time||""));const td=today();
  const todays=tasks.filter(t=>!t.done&&t.date===td),future=tasks.filter(t=>!t.done&&t.date>td),past=tasks.filter(t=>!t.done&&t.date<td),done=tasks.filter(t=>t.done).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
  const section=(title,arr)=>`<div class="schedule-section"><b>${title}</b><span class="count-pill">${arr.length}件</span></div>${arr.length?arr.map(taskCard).join(""):'<div class="card schedule-empty">予定はありません</div>'}`;
- m.innerHTML=`<div class="schedule-head"><div><h2>📅 予定</h2><div class="schedule-sub">これからの作業を管理しましょう</div></div><button class="schedule-add" onclick="openScheduleForm()">＋ 予定</button></div>${weekStrip(tasks)}${past.length?section("期限を過ぎた予定",past):""}${section("今日の予定",todays)}${section("今後の予定",future)}${done.length?section("完了した予定",done):""}`;
+ m.innerHTML=`<div class="schedule-head"><div><h2>📅 予定</h2><div class="schedule-sub">これからの作業を管理しましょう</div></div><button class="schedule-add" onclick="openScheduleForm()">＋ 予定</button></div>${monthCalendar(tasks)}${past.length?section("期限を過ぎた予定",past):""}${section("今日の予定",todays)}${section("今後の予定",future)}${done.length?section("完了した予定",done):""}`;
 }
 function openScheduleForm(){scheduleEditing=true;scheduleWork="inspection";render()}
 function closeScheduleForm(){scheduleEditing=false;render()}
