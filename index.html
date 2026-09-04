@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f5b400">
-<meta name="bee-manager-version" content="V45">
+<meta name="bee-manager-version" content="V46">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -43,7 +43,7 @@ input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radiu
 .record-b-temp{font-size:10px;font-weight:700;line-height:1.2;margin-top:2px}
 .record-b-left{border-right:1px solid #ece9e1;padding:10px 8px;display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;border-radius:10px;min-height:100%;box-sizing:border-box}
 .record-b-left.record-color-inspection{background:#fff1bd}.record-b-left.record-color-harvest{background:#dcecff}.record-b-left.record-color-addbox{background:#e2f6d7}.record-b-left.record-color-medicine{background:#f2e4ff}.record-b-left.record-color-remove{background:#ffe0df}.record-b-left.record-color-move{background:#e0f4f2}
-.record-b-type{width:100%;padding:8px 5px;border-radius:12px;font-size:12px;font-weight:800}
+.record-b-type{width:100%;padding:8px 5px;border-radius:12px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:4px}.record-b-type .app-icon{width:16px;height:16px}
 .record-b-date{font-size:10px;line-height:1.45;color:#555;margin-top:8px;word-break:keep-all}
 .record-b-center{min-width:0;display:flex;flex-direction:column;justify-content:center}
 .record-b-hive-name{font-size:11px;color:#777;margin-bottom:3px}
@@ -93,7 +93,7 @@ input,select,textarea{width:100%;padding:12px;border:1px solid #ddd;border-radiu
 .record-swipe.open .record-b-card{transform:translateX(-78px)}
 .harvest-box-picker .box-tier{cursor:pointer}
 </style>
-</head>
+\n<style id="v46-unified-design">\n:root{--brand-green:#2f6f43;--brand-soft:#eef6ec;--brand-cream:#fbfaf4}\n.app-icon{width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;flex:0 0 auto}.app-icon svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.work-icon-label{display:inline-flex;align-items:center;gap:7px}.work-choice button{display:flex;align-items:center;justify-content:center;gap:7px;min-height:48px}.work-choice .app-icon{width:21px;height:21px}.record-b-title{display:flex;align-items:center;gap:6px}.record-b-title .app-icon{width:18px;height:18px}.bee-mark{display:inline-flex;align-items:center;gap:5px;color:#6b5420}.bee-mark .bee-body{font-size:20px}.schedule-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px}.schedule-head h2{margin:0;font-size:25px}.schedule-sub{font-size:12px;color:var(--muted);margin-top:3px}.schedule-add{background:var(--brand-green);color:#fff;padding:10px 14px}.week-card{background:#fff;border:1px solid var(--line);border-radius:17px;padding:12px;margin-bottom:18px}.week-month{text-align:center;font-weight:800;margin-bottom:10px}.week-row{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}.week-day{font-size:10px;color:#777}.week-date{height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:13px;position:relative}.week-date.today{background:var(--brand-green);color:#fff;font-weight:800}.week-date.has-task:after{content:"";width:5px;height:5px;border-radius:50%;background:#f5b400;position:absolute;bottom:1px}.schedule-section{display:flex;align-items:center;justify-content:space-between;margin:17px 2px 8px}.schedule-section b{font-size:18px}.count-pill{font-size:11px;background:#eaf1e7;padding:5px 9px;border-radius:99px}.task-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:12px;margin-bottom:9px;display:grid;grid-template-columns:50px minmax(0,1fr);gap:10px;align-items:center}.task-time{text-align:center;font-size:12px;font-weight:800}.task-main{min-width:0}.task-title{display:flex;align-items:center;gap:7px;font-weight:800;font-size:16px}.task-title .app-icon{width:22px;height:22px}.task-meta{font-size:12px;color:#666;margin-top:3px}.task-memo{font-size:11px;color:#777;margin-top:3px}.task-actions{grid-column:1/-1;display:flex;gap:7px}.task-actions button{flex:1;padding:9px;font-size:12px}.task-record{background:var(--brand-green);color:#fff}.task-done{opacity:.58}.task-done .task-title{text-decoration:none}.schedule-form-title{display:flex;align-items:center;gap:8px;margin:0 0 12px}.schedule-form .card{margin-bottom:10px}.schedule-work-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.schedule-work-grid button{background:#fff;border:1px solid #ddd;display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px;font-size:12px}.schedule-work-grid button.selected{border:2px solid var(--brand-green);background:var(--brand-soft);color:#173f27}.schedule-work-grid .app-icon{width:25px;height:25px}.schedule-save{width:100%;background:var(--brand-green);color:#fff;margin-top:12px}.schedule-empty{text-align:center;padding:22px;color:#777}.schedule-empty .bee{font-size:30px;display:block;margin-bottom:5px}\n</style>\n</head>
 <body>
 <div class="app">
 <header><h1>🐝 養蜂管理</h1><div class="date" id="today"></div></header>
@@ -110,7 +110,7 @@ const KEY="beeManagerV1";
 let data=JSON.parse(localStorage.getItem(KEY)||'{"hives":[],"records":[],"tasks":[]}');
 data.hives=(data.hives||[]).map(h=>({...h,realTiers:Number(h.realTiers||0),builtTiers:Number(h.builtTiers||0),flowHive:!!h.flowHive,flowCount:Number(h.flowCount||0),flowLevels:Array.isArray(h.flowLevels)?h.flowLevels:[]}));
 data.records=(data.records||[]).map((r,i)=>({...r,workType:r.workType||"inspection",realTiers:Number(r.realTiers||0),builtTiers:Number(r.builtTiers||0),flowHive:!!r.flowHive,flowCount:Number(r.flowCount||0),flowLevels:Array.isArray(r.flowLevels)?r.flowLevels:[],createdAt:Number(r.createdAt||i+1)}));
-let currentTab="home",editingHive=null,selectedHive=null,harvestSelectedCount=0,harvestSelectedTiers=[],harvestFlowSelected=[];
+let currentTab="home",editingHive=null,selectedHive=null,harvestSelectedCount=0,harvestSelectedTiers=[],harvestFlowSelected=[],scheduleEditing=false,scheduleWork="inspection",activeTaskId=null;
 const save=()=>localStorage.setItem(KEY,JSON.stringify(data));
 const esc=s=>String(s??"").replace(/[&<>\"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
 const today=()=>new Date().toISOString().slice(0,10);
@@ -138,6 +138,19 @@ function hiveForm(m){const isNew=editingHive==="new";const h=isNew?{}:data.hives
 function editHive(id){editingHive=id;render()}
 function saveHive(){const n=document.getElementById("hn").value.trim();if(!n)return alert("巣箱名・番号を入力してください");const isNew=editingHive==="new";const o=isNew?{}:(data.hives.find(x=>x.id===editingHive)||{});let real=Number(o.realTiers||0),built=Number(o.builtTiers||0),flow=!!o.flowHive,count=Number(o.flowCount||0),levels=Array.isArray(o.flowLevels)?o.flowLevels:[];if(isNew){real=Math.max(0,Number(document.getElementById("hreal")?.value||0));built=Math.min(real,Math.max(0,Number(document.getElementById("hbuilt")?.value||0)));count=document.getElementById("hflow")?.value==="true"?Math.max(0,Number(document.getElementById("hfc")?.value||0)):0;flow=count>0;levels=flow?Array.from({length:count},(_,i)=>document.getElementById("nf"+i)?.dataset.level||"空"):[];const status=document.getElementById("hs")?.value||"未設定";const h={id:crypto.randomUUID(),name:n,place:document.getElementById("hp").value,memo:document.getElementById("hm").value,status,realTiers:real,builtTiers:built,flowHive:flow,flowCount:count,flowLevels:levels};data.hives.push(h)}else{const h={id:editingHive,name:n,place:document.getElementById("hp").value,memo:document.getElementById("hm").value,status:o.status||"未設定",realTiers:real,builtTiers:built,flowHive:flow,flowCount:count,flowLevels:levels};data.hives[data.hives.findIndex(x=>x.id===editingHive)]=h}save();editingHive=null;render()}
 function viewHive(id){selectedHive=id;const h=data.hives.find(x=>x.id===id);const rs=data.records.filter(r=>r.hiveId===id).sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));const real=Number(h.realTiers||0),built=Math.min(Number(h.builtTiers||0),real);document.getElementById("main").innerHTML=`<button class="secondary back" onclick="selectedHive=null;render()">← 巣箱一覧</button><div class="card"><h2 style="margin-top:0">🐝 ${esc(h.name)}</h2><div>場所：${esc(h.place||"-")}</div><div>状態：${esc(h.status||"-")}</div>${flowHtml(h,false)}<div class="box-stack">${stackHtml(real,built)||'<div class="hint">未設定</div>'}</div><div style="margin-top:8px"><b>重箱</b>：実段数 ${real}段／巣あり ${built}段（上から）</div><div class="muted" style="margin-top:10px">${esc(h.memo||"")}</div></div><div class="section-title">作業履歴</div>${rs.length?rs.map(recordCard).join(""):'<div class="card empty">記録なし</div>'}<button style="width:100%;margin-top:10px" onclick="newRecord('${id}')">＋ この巣箱の作業を記録</button>`}
+function workIcon(t){
+ const paths={
+  inspection:'<circle cx="10" cy="10" r="5.5"/><path d="M14.2 14.2 20 20"/>',
+  harvest:'<path d="M8 5h8l1 3v11H7V8l1-3Z"/><path d="M9 2h6v3H9z"/><path d="M10 12c1.5-2 2.5-2 4 0-1.5 2-2.5 2-4 0Z"/>',
+  addbox:'<path d="m4 7 8-4 8 4-8 4-8-4Z"/><path d="m4 12 8 4 8-4"/><path d="m4 17 8 4 8-4"/>',
+  medicine:'<path d="M9 3h6v4l2 2v11H7V9l2-2V3Z"/><path d="M9 6h6"/><path d="M10 14h4M12 12v4"/>',
+  remove:'<path d="M4 7h16"/><path d="m9 7 .5-3h5L15 7"/><path d="m7 7 1 14h8l1-14"/><path d="M10 11v6M14 11v6"/>',
+  move:'<path d="M3 7h11v10H3z"/><path d="m14 11h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+  other:'<circle cx="6" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="18" cy="12" r="1"/>'
+ };
+ return `<span class="app-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${paths[t]||paths.other}</svg></span>`;
+}
+function workLabelIcon(t){return `<span class="work-icon-label">${workIcon(t)}<span>${esc(workLabel(t))}</span></span>`}
 function workLabel(t){
  const labels={inspection:"内見",harvest:"採蜜",addbox:"次箱",medicine:"薬設置",remove:"撤去",move:"移動"};
  return labels[t]||"作業";
@@ -206,7 +219,7 @@ function recordCard(r){
   <div class="record-b-card">
    <div class="record-b-layout">
     <div class="record-b-left ${cls[r.workType]||"record-color-inspection"}">
-     <div class="record-b-type">${labels[r.workType]||"作業"}</div>
+     <div class="record-b-type">${workIcon(r.workType)}<span>${labels[r.workType]||"作業"}</span></div>
      <div class="record-b-year">${esc((r.date||"").slice(0,4))}年</div>
      <div class="record-b-monthday">${esc((r.date||"").slice(5).replace(/-/g,"/"))}</div>
      <div class="record-b-weather">${esc(r.weather||"")}</div>
@@ -227,14 +240,14 @@ function recordCard(r){
  </div>`;
 }
 function records(m){const rs=[...data.records].sort((a,b)=>Number(b.createdAt||0)-Number(a.createdAt||0));m.innerHTML=`<div class="row"><div><h2 style="margin:0">記録</h2><div class="muted">すべての作業に内検を含みます</div></div><button onclick="newRecord()">＋ 記録</button></div><div style="margin-top:14px">${rs.length?rs.map(recordCard).join(""):'<div class="card empty">まだ記録がありません。</div>'}</div>`}
-function newRecord(hiveId){
+function newRecord(hiveId,presetWork,taskId){
  const m=document.getElementById("main");currentTab="records";
  const h=data.hives.find(x=>x.id===hiveId)||data.hives[0];
  if(!h){m.innerHTML='<div class="card empty">先に巣箱を登録してください。</div>';return}
- selectedWorks=["inspection"];
+ selectedWorks=presetWork&&presetWork!=="inspection"?["inspection",presetWork]:["inspection"];activeTaskId=taskId||null;
  m.innerHTML=`<button class="secondary back" onclick="render()">← 戻る</button><h2>📝 作業を登録</h2>
  <label>巣箱</label><select id="rh">${data.hives.map(x=>`<option value="${x.id}" ${x.id===h.id?"selected":""}>${esc(x.name)}</option>`).join("")}</select>
- <label>作業を選択（内見は常に含まれます）</label><div class="work-choice">${[["inspection","内検"],["harvest","採蜜"],["addbox","次箱"],["medicine","薬設置"],["remove","撤去"],["move","移動"]].map(([t,l])=>`<button id="wt-${t}" class="${t==="inspection"?"selected":""}" onclick="toggleWork('${t}')">${l}</button>`).join("")}</div><div class="hint">内見＋その他1つまで。その他の作業を選ぶと自動で切り替わります。</div>
+ <label>作業を選択（内見は常に含まれます）</label><div class="work-choice">${[["inspection","内検"],["harvest","採蜜"],["addbox","次箱"],["medicine","薬設置"],["remove","撤去"],["move","移動"]].map(([t,l])=>`<button id="wt-${t}" class="${selectedWorks.includes(t)?"selected":""}" onclick="toggleWork('${t}')">${workIcon(t)}<span>${l}</span></button>`).join("")}</div><div class="hint">内見＋その他1つまで。その他の作業を選ぶと自動で切り替わります。</div>
  <label>日付</label><input id="rd" type="date" value="${today()}"><label>天気</label><select id="rw"><option>☀️ 晴れ</option><option>☁️ 曇り</option><option>🌧️ 雨</option></select>
  <label>気温（℃）</label><input id="rt" type="number" placeholder="28"><div id="inspectionArea"></div><div id="flowRecordArea"></div><div id="workArea"></div><div id="feedArea"></div>
  <div class="section-title">写真</div><div id="photoArea"></div><label>メモ</label><textarea id="rm" rows="5"></textarea>
@@ -362,6 +375,7 @@ async function saveRecord(){
    alert("写真の容量が大きすぎて保存できませんでした。写真を少なくしてもう一度登録してください。");
    return;
  }
+ if(activeTaskId){const task=(data.tasks||[]).find(t=>t.id===activeTaskId);if(task){task.done=true;task.completedAt=Date.now();save()}activeTaskId=null;}
  render();
  // 登録後に記録一覧へ戻った直後は、必ずスクロール最上部から表示
  requestAnimationFrame(()=>{
@@ -370,9 +384,41 @@ async function saveRecord(){
    document.body.scrollTop=0;
  });
 }
-function calendar(m){const upcoming=data.tasks||[];m.innerHTML=`<h2>📅 予定</h2><div class="card"><label>作業内容</label><input id="tn" placeholder="例：巣箱01 内検"><label>日付</label><input id="td" type="date" value="${today()}"><button style="width:100%;margin-top:12px" onclick="addTask()">予定を追加</button></div><div class="section-title">予定一覧</div>${upcoming.sort((a,b)=>a.date.localeCompare(b.date)).map((t,i)=>`<div class="card" style="margin-bottom:8px"><b>${esc(t.date)}</b>　${esc(t.name)} <button class="secondary small" style="float:right;padding:6px 9px" onclick="delTask(${i})">削除</button></div>`).join("")||'<div class="card empty">予定はありません</div>'}`}
-function addTask(){const n=document.getElementById("tn").value.trim(),d=document.getElementById("td").value;if(!n)return alert("作業内容を入力してください");data.tasks.push({name:n,date:d});save();render()}function delTask(i){data.tasks.splice(i,1);save();render()}
-document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{currentTab=b.dataset.tab;editingHive=null;selectedHive=null;render()});render();
+function taskDateLabel(d){try{return new Date(d+"T00:00:00").toLocaleDateString("ja-JP",{month:"numeric",day:"numeric",weekday:"short"})}catch(e){return d}}
+function weekStrip(tasks){
+ const now=new Date(),day=now.getDay(),sun=new Date(now);sun.setDate(now.getDate()-day);
+ const days=Array.from({length:7},(_,i)=>{const d=new Date(sun);d.setDate(sun.getDate()+i);return d});
+ const names=["日","月","火","水","木","金","土"];
+ return `<div class="week-card"><div class="week-month">${now.getFullYear()}年 ${now.getMonth()+1}月</div><div class="week-row">${days.map((d,i)=>`<div><div class="week-day">${names[i]}</div><div class="week-date ${d.toDateString()===now.toDateString()?"today":""} ${tasks.some(t=>t.date===d.toISOString().slice(0,10)&&!t.done)?"has-task":""}">${d.getDate()}</div></div>`).join("")}</div></div>`;
+}
+function taskCard(t){
+ const h=data.hives.find(x=>x.id===t.hiveId),type=t.workType||"other",label=t.workLabel||workLabel(type);
+ return `<div class="task-card ${t.done?"task-done":""}"><div class="task-time">${t.time||taskDateLabel(t.date)}</div><div class="task-main"><div class="task-title">${workIcon(type)}<span>${esc(label)}</span></div><div class="task-meta">${h?esc(h.name):"巣箱未指定"}</div>${t.memo?`<div class="task-memo">${esc(t.memo)}</div>`:""}</div><div class="task-actions">${t.done?`<button class="secondary" onclick="toggleTaskDone('${t.id}')">完了を戻す</button>`:(type!=="other"&&h?`<button class="task-record" onclick="startTaskRecord('${t.id}')">この予定から記録する</button>`:`<button class="secondary" onclick="toggleTaskDone('${t.id}')">完了</button>`)}<button class="secondary" onclick="deleteTask('${t.id}')">削除</button></div></div>`;
+}
+function calendar(m){
+ data.tasks=(data.tasks||[]).map((t,i)=>({...t,id:t.id||`legacy-${i}-${t.date||""}`,workType:t.workType||"other",memo:t.memo||t.name||"",done:!!t.done}));
+ if(scheduleEditing){scheduleForm(m);return}
+ const tasks=[...data.tasks].sort((a,b)=>(a.date||"").localeCompare(b.date||"")||(a.time||"").localeCompare(b.time||""));const td=today();
+ const todays=tasks.filter(t=>!t.done&&t.date===td),future=tasks.filter(t=>!t.done&&t.date>td),past=tasks.filter(t=>!t.done&&t.date<td),done=tasks.filter(t=>t.done).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+ const section=(title,arr)=>`<div class="schedule-section"><b>${title}</b><span class="count-pill">${arr.length}件</span></div>${arr.length?arr.map(taskCard).join(""):'<div class="card schedule-empty"><span class="bee">🐝</span>予定はありません</div>'}`;
+ m.innerHTML=`<div class="schedule-head"><div><h2>📅 予定</h2><div class="schedule-sub">これからの作業を管理しましょう <span class="bee-mark"><span class="bee-body">🐝</span></span></div></div><button class="schedule-add" onclick="openScheduleForm()">＋ 予定</button></div>${weekStrip(tasks)}${past.length?section("期限を過ぎた予定",past):""}${section("今日の予定",todays)}${section("今後の予定",future)}${done.length?section("完了した予定",done):""}`;
+}
+function openScheduleForm(){scheduleEditing=true;scheduleWork="inspection";render()}
+function closeScheduleForm(){scheduleEditing=false;render()}
+function selectScheduleWork(t){scheduleWork=t;document.querySelectorAll(".schedule-work-grid button").forEach(b=>b.classList.toggle("selected",b.dataset.work===t))}
+function scheduleForm(m){
+ const types=["inspection","harvest","addbox","medicine","remove","move","other"];
+ m.innerHTML=`<button class="secondary back" onclick="closeScheduleForm()">← 戻る</button><h2 class="schedule-form-title">📅 予定を追加 <span class="bee-mark"><span class="bee-body">🐝</span></span></h2><div class="schedule-form"><div class="card"><label>日付</label><input id="taskDate" type="date" value="${today()}"><label>時間（任意）</label><input id="taskTime" type="time"></div><div class="card"><label>巣箱</label><select id="taskHive"><option value="">選択してください</option>${data.hives.map(h=>`<option value="${h.id}">${esc(h.name)}</option>`).join("")}</select><label>作業内容</label><div class="schedule-work-grid">${types.map(t=>`<button type="button" data-work="${t}" class="${t===scheduleWork?"selected":""}" onclick="selectScheduleWork('${t}')">${workIcon(t)}<span>${t==="other"?"その他":workLabel(t)}</span></button>`).join("")}</div><div id="otherTaskArea"><label>その他の作業名</label><input id="taskOther" placeholder="例：草刈り"></div></div><div class="card"><label>メモ</label><textarea id="taskMemo" rows="4" placeholder="例：王台と貯蜜量を確認"></textarea></div><button class="schedule-save" onclick="saveTaskV46()">保存</button></div>`;
+ document.getElementById("otherTaskArea").style.display=scheduleWork==="other"?"block":"none";
+ const obs=new MutationObserver(()=>{const a=document.getElementById("otherTaskArea");if(a)a.style.display=scheduleWork==="other"?"block":"none"});obs.observe(document.querySelector('.schedule-work-grid'),{attributes:true,subtree:true,attributeFilter:['class']});
+}
+function saveTaskV46(){const date=document.getElementById("taskDate").value,hiveId=document.getElementById("taskHive").value,time=document.getElementById("taskTime").value,memo=document.getElementById("taskMemo").value.trim(),other=document.getElementById("taskOther")?.value.trim()||"";if(!date)return alert("日付を入力してください");if(scheduleWork!=="other"&&!hiveId)return alert("巣箱を選択してください");if(scheduleWork==="other"&&!other)return alert("作業名を入力してください");data.tasks.push({id:crypto.randomUUID(),date,time,hiveId,workType:scheduleWork,workLabel:scheduleWork==="other"?other:"",memo,done:false,createdAt:Date.now()});save();scheduleEditing=false;render()}
+function startTaskRecord(id){const t=(data.tasks||[]).find(x=>x.id===id);if(!t)return;if(!t.hiveId)return alert("巣箱が設定されていません");newRecord(t.hiveId,t.workType,id)}
+function toggleTaskDone(id){const t=(data.tasks||[]).find(x=>x.id===id);if(!t)return;t.done=!t.done;t.completedAt=t.done?Date.now():null;save();render()}
+function deleteTask(id){const i=(data.tasks||[]).findIndex(x=>x.id===id);if(i<0)return;if(!confirm("この予定を削除しますか？"))return;data.tasks.splice(i,1);save();render()}
+function addTask(){saveTaskV46()}
+function delTask(i){if(data.tasks?.[i])deleteTask(data.tasks[i].id)}
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{currentTab=b.dataset.tab;editingHive=null;selectedHive=null;scheduleEditing=false;render()});render();
 </script>
 
 <script id="record-swipe-delete-js-v2">
