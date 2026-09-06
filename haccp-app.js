@@ -10,7 +10,8 @@ let bottleSelection=[];
 
 const harvestChecks=['体調は良い','手洗い・清潔な服装ができている','作業台・作業場所は清潔','採蜜器具は洗浄済みで乾いている','巣蜜にカビ・虫・異常な臭いがない','異物混入のおそれがない','濾過器具は清潔','移し替える容器は清潔で乾いている'];
 const harvestSteps=['重箱を準備','巣蜜を取り出す','蜂蜜を採取・濾過','清潔な容器へ移す'];
-const bottleChecks=['体調は良い','手洗い・清潔な服装ができている','作業台・作業場所は清潔','瓶と蓋は清潔で乾いており破損がない','瓶詰め器具は清潔','異物混入のおそれがない','内容量を確認した','ラベル・製品ロットを確認した'];
+const bottleChecks=['体調は良い','手洗い・清潔な服装ができている','作業台・作業場所は清潔','瓶と蓋は清潔で乾いており破損がない','瓶詰め器具は清潔','異物混入のおそれがない'];
+const bottleSteps=['採蜜ロットの確認','瓶・蓋の準備','清潔な瓶に蜂蜜を詰める','ラベルの貼り付け'];
 
 function loadDB(){
   try{
@@ -49,17 +50,20 @@ function beePending(){
     return {id:String(r.id),hiveId:String(r.hiveId||''),hiveName:h.name||'名称未設定',place:h.place||'',date:r.date||'',harvestBoxes:Number(r.harvestBoxes||0),harvestBoxTiers:Array.isArray(r.harvestBoxTiers)?r.harvestBoxTiers:[],harvestFlows:Array.isArray(r.harvestFlows)?r.harvestFlows:[],memo:r.memo||''};
   }).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
 }
-function unbottledHarvests(){const used=new Set(db.bottles.flatMap(b=>(b.srcIds||[]).map(String)));return db.harvests.filter(h=>!used.has(String(h.id)))}
+function harvestInitialGrams(h){return Math.max(0,Math.round(Number(h.kg||0)*1000))}
+function harvestUsage(hid){let product=0,loss=0;for(const b of db.bottles){if(Array.isArray(b.allocations)){for(const a of b.allocations){if(String(a.harvestId)===String(hid)){product+=Number(a.productGrams||0);loss+=Number(a.lossGrams||0)}}}else if((b.srcIds||[]).map(String).includes(String(hid))){const h=db.harvests.find(x=>String(x.id)===String(hid));product+=harvestInitialGrams(h||{})}}return {product,loss,total:product+loss}}
+function harvestRemainingGrams(h){if(h.closed)return 0;return Math.max(0,harvestInitialGrams(h)-harvestUsage(h.id).total)}
+function unbottledHarvests(){return db.harvests.filter(h=>harvestRemainingGrams(h)>0)}
 
 function home(){
   const pending=beePending(),waiting=unbottledHarvests();
   shell('HACCP管理',`<div class="grid"><div class="card" onclick="page('harvest')">🍯<b>採蜜</b><small>重箱から蜂蜜を採取</small></div><div class="card" onclick="page('bottle')">🫙<b>瓶詰め</b><small>採蜜後の蜂蜜を製品化</small></div><div class="card" onclick="page('records')">▤<b>記録を見る</b><small>ロット・衛生記録</small></div><div class="card" onclick="page('stock')">📦<b>在庫・販売</b><small>製品本数を管理</small></div></div>
-  <h2 class="section">採蜜待ち <span class="badge blue">${pending.length}件</span></h2>${pending.length?pending.slice(0,6).map(r=>pendingCard(r,true)).join(''):'<div class="empty panel">Beeレコードの未処理の採蜜作業はありません。</div>'}${pending.length>6?`<button class="action secondary" onclick="page('harvest')">すべて見る</button>`:''}
-  <h2 class="section">瓶詰め待ち <span class="badge gold">${waiting.length}ロット</span></h2>${waiting.length?waiting.slice(0,6).map(h=>harvestWaitCard(h,true)).join(''):'<div class="empty panel">瓶詰め待ちの採蜜ロットはありません。</div>'}${waiting.length>6?`<button class="action secondary" onclick="page('bottle')">すべて見る</button>`:''}
+  <h2 class="section">採蜜待ち <span class="badge blue">${pending.length}件</span></h2>${pending.length?pending.slice(0,6).map(r=>pendingCard(r,false)).join(''):'<div class="empty panel">Beeレコードの未処理の採蜜作業はありません。</div>'}${pending.length>6?`<div class="hint">ほか ${pending.length-6}件</div>`:''}
+  <h2 class="section">瓶詰め待ち <span class="badge gold">${waiting.length}ロット</span></h2>${waiting.length?waiting.slice(0,6).map(h=>harvestWaitCard(h,false)).join(''):'<div class="empty panel">瓶詰め待ちの採蜜ロットはありません。</div>'}${waiting.length>6?`<div class="hint">ほか ${waiting.length-6}ロット</div>`:''}
   <div class="panel" style="margin-top:20px"><b>現在の記録</b><div class="hint">採蜜 ${db.harvests.length}件 ／ 瓶詰め ${db.bottles.length}件 ／ 販売 ${db.sales.length}件</div></div>`)
 }
 function pendingCard(r,tap=false){const extra=[r.harvestBoxes?`重箱 ${r.harvestBoxes}箱`:'' ,r.harvestFlows.length?`フローハイブ ${r.harvestFlows.length}基`:'' ].filter(Boolean).join(' ／ ')||'採蜜作業';return `<div class="pending-card ${tap?'tap':''}" ${tap?`onclick="openHarvestWith('${esc(r.id)}')"`:''}><div class="pending-main"><div class="pending-title">🐝 ${esc(r.hiveName)}</div><div class="pending-meta">Beeレコード採蜜日：${esc(fmtDate(r.date))}${r.place?`<br>場所：${esc(r.place)}`:''}<br>${esc(extra)}</div></div></div>`}
-function harvestWaitCard(h,tap=false){const names=(h.hives||[]).map(x=>x.name).filter(Boolean).join('・')||'群情報なし';return `<div class="pending-card ${tap?'tap':''}" ${tap?`onclick="openBottleWith('${esc(h.id)}')"`:''}><div class="pending-main"><div class="pending-title">🍯 ${esc(h.lot)}</div><div class="pending-meta">採蜜日：${esc(fmtDate(h.date))}<br>由来：${esc(names)}${h.kg?` ／ ${esc(h.kg)}kg`:''}</div></div></div>`}
+function harvestWaitCard(h,tap=false){const names=(h.hives||[]).map(x=>x.name).filter(Boolean).join('・')||'群情報なし',rem=harvestRemainingGrams(h);return `<div class="pending-card ${tap?'tap':''}" ${tap?`onclick="openBottleWith('${esc(h.id)}')"`:''}><div class="pending-main"><div class="pending-title">🍯 ${esc(h.lot)}</div><div class="pending-meta">採蜜日：${esc(fmtDate(h.date))}<br>由来：${esc(names)}<br>残量：約 ${esc(rem)}g${h.kg?` ／ 採蜜時 ${esc(h.kg)}kg`:''}</div></div></div>`}
 
 function harvest(){
   pendingSelection=[];const p=beePending();
@@ -70,12 +74,12 @@ function startHarvestForm(){
   const ids=[...document.querySelectorAll('.beePick:checked')].map(x=>x.value);if(!ids.length)return alert('採蜜作業を1件以上選んでください。');
   const source=beePending().filter(r=>ids.includes(r.id));pendingSelection=source;
   shell('採蜜記録',`<div class="panel"><b>選択した群</b><div class="pillline">${source.map(r=>`<span class="badge blue">${esc(r.hiveName)}・${esc(fmtDate(r.date))}</span>`).join('')}</div></div>
+  <h2 class="section">採蜜前の衛生チェック</h2>${harvestChecks.map((x,i)=>`<label class="check"><input class="hCk" type="checkbox"><span>${i+1}. ${esc(x)}</span></label>`).join('')}
   <h2 class="section">採蜜工程</h2>${harvestSteps.map((s,i)=>`<label class="step"><input class="stepCk" type="checkbox" style="width:24px;height:24px"><span class="step-num">${i+1}</span><span class="step-text">${esc(s)}</span></label>`).join('')}
   <div class="field"><label>採蜜作業日（重箱から蜜を採取した日）</label><input id="hDate" type="date" value="${today()}"></div>
   <div class="field"><label>採蜜量（kg）</label><input id="hKg" type="number" min="0" step="0.1" placeholder="例：5.2"></div>
   <div class="field"><label>移し替え先の容器・容器番号</label><input id="hContainer" placeholder="例：ステンレス容器1"></div>
   <div class="field"><label>複数群の蜜について</label><select id="hMixed"><option value="auto">選択内容から判断</option><option value="yes">混ざっている</option><option value="no">混ざっていない</option></select><div class="hint">複数の群を同じ容器へ移す場合は「混ざっている」を選択してください。</div></div>
-  <h2 class="section">採蜜時の衛生チェック</h2>${harvestChecks.map((x,i)=>`<label class="check"><input class="hCk" type="checkbox"><span>${i+1}. ${esc(x)}</span></label>`).join('')}
   <div class="field"><label>メモ・異常</label><textarea id="hMemo" rows="4"></textarea></div><button class="action primary" onclick="saveHarvest()">採蜜記録を保存</button>`)
 }
 function saveHarvest(){
@@ -91,21 +95,28 @@ function saveHarvest(){
 
 function bottle(){
   bottleSelection=[];const hs=unbottledHarvests();
-  shell('瓶詰め',`<div class="panel"><b>瓶詰め待ちの採蜜ロット</b><div class="hint">採蜜日と瓶詰め日が別の日でも、瓶詰め当日の衛生チェックを記録します。複数の採蜜ロットを選んで混ぜることもできます。</div></div><h2 class="section">使用する採蜜ロットを選ぶ</h2>${hs.length?hs.map(h=>`<label class="pending-card"><input type="checkbox" class="lotPick" value="${esc(h.id)}"><div class="pending-main"><div class="pending-title">🍯 ${esc(h.lot)}</div><div class="pending-meta">採蜜日：${esc(fmtDate(h.date))}<br>由来：${esc((h.hives||[]).map(x=>x.name).join('・')||'-')}${h.kg?` ／ ${esc(h.kg)}kg`:''}</div></div></label>`).join(''):'<div class="empty panel">瓶詰め待ちの採蜜ロットはありません。</div>'}${hs.length?`<button class="action primary" onclick="startBottleForm()">選んだロットを瓶詰め</button>`:''}`)
+  shell('瓶詰め',`<div class="panel"><b>瓶詰め待ちの採蜜ロット</b><div class="hint">採蜜日と瓶詰め日が別の日でも、瓶詰め当日の衛生チェックを記録します。複数の採蜜ロットを選んで混ぜることもできます。</div></div><h2 class="section">使用する採蜜ロットを選ぶ</h2>${hs.length?hs.map(h=>`<label class="pending-card"><input type="checkbox" class="lotPick" value="${esc(h.id)}"><div class="pending-main"><div class="pending-title">🍯 ${esc(h.lot)}</div><div class="pending-meta">採蜜日：${esc(fmtDate(h.date))}<br>由来：${esc((h.hives||[]).map(x=>x.name).join('・')||'-')}${h.kg?` ／ 採蜜時 ${esc(h.kg)}kg`:''}<br>残量：約 ${harvestRemainingGrams(h)}g</div></div></label>`).join(''):'<div class="empty panel">瓶詰め待ちの採蜜ロットはありません。</div>'}${hs.length?`<button class="action primary" onclick="startBottleForm()">選んだロットを瓶詰め</button>`:''}`)
 }
 function openBottleWith(id){page('bottle');requestAnimationFrame(()=>{const el=[...document.querySelectorAll('.lotPick')].find(x=>x.value===id);if(el){el.checked=true;startBottleForm()}})}
 function startBottleForm(){
   const ids=[...document.querySelectorAll('.lotPick:checked')].map(x=>x.value);if(!ids.length)return alert('採蜜ロットを1件以上選んでください。');bottleSelection=unbottledHarvests().filter(h=>ids.includes(String(h.id)));
-  shell('瓶詰め記録',`<div class="panel"><b>使用する採蜜ロット</b><div class="pillline">${bottleSelection.map(h=>`<span class="badge gold">${esc(h.lot)}</span>`).join('')}</div>${bottleSelection.length>1?'<div class="hint">複数の採蜜ロットを混合して1つの製品ロットにします。</div>':''}</div>
-  <div class="field"><label>瓶詰め日</label><input id="bDate" type="date" value="${today()}"></div><div class="row"><div class="field"><label>内容量（g）</label><input id="bGrams" type="number" value="300" min="1"></div><div class="field"><label>本数</label><input id="bCount" type="number" min="1" placeholder="例：20"></div></div>
-  <h2 class="section">瓶詰め時の衛生チェック</h2>${bottleChecks.map((x,i)=>`<label class="check"><input class="bCk" type="checkbox"><span>${i+1}. ${esc(x)}</span></label>`).join('')}
-  <div class="field"><label>メモ・異常</label><textarea id="bMemo" rows="4"></textarea></div><button class="action primary" onclick="saveBottle()">瓶詰め記録を保存</button>`)
+  shell('瓶詰め記録',`<div class="panel"><b>使用する採蜜ロット</b><div class="pillline">${bottleSelection.map(h=>`<span class="badge gold">${esc(h.lot)}（残 ${harvestRemainingGrams(h)}g）</span>`).join('')}</div>${bottleSelection.length>1?'<div class="hint">複数ロットを混ぜる場合は、それぞれから製品に使用する量を入力してください。</div>':''}</div>
+  <h2 class="section">瓶詰め前の衛生チェック</h2>${bottleChecks.map((x,i)=>`<label class="check"><input class="bCk" type="checkbox"><span>${i+1}. ${esc(x)}</span></label>`).join('')}
+  <h2 class="section">瓶詰めの作業工程</h2>${bottleSteps.map((x,i)=>`<label class="step"><input class="bStepCk" type="checkbox" style="width:24px;height:24px"><span class="step-num">${i+1}</span><span class="step-text">${esc(x)}</span></label>`).join('')}
+  <div class="field"><label>瓶詰め日</label><input id="bDate" type="date" value="${today()}"></div><div class="row"><div class="field"><label>内容量（g）</label><input id="bGrams" type="number" value="300" min="1" oninput="updateBottleTotals()"></div><div class="field"><label>本数</label><input id="bCount" type="number" min="1" placeholder="例：5" oninput="updateBottleTotals()"></div></div>
+  <div class="panel"><b>採蜜ロットごとの使用量</b><div class="hint">「製品に入った量」の合計が、内容量×本数と同じになるよう入力します。瓶や器具への付着・こぼれはロス量へ入力してください。</div>${bottleSelection.map((h,i)=>`<div class="source-use"><b>${esc(h.lot)}</b><div class="mini">現在残量：約 ${harvestRemainingGrams(h)}g</div><div class="row"><div class="field"><label>製品に使用（g）</label><input class="srcProduct" data-id="${esc(h.id)}" type="number" min="0" step="1" value="${bottleSelection.length===1?'0':''}" oninput="updateBottleTotals()"></div><div class="field"><label>ロス量（g・任意）</label><input class="srcLoss" data-id="${esc(h.id)}" type="number" min="0" step="1" value="0" oninput="updateBottleTotals()"></div></div><label class="check"><input class="srcFinish" data-id="${esc(h.id)}" type="checkbox"><span>この採蜜ロットを今回で使い切った</span></label></div>`).join('')}<div id="bTotal" class="lot">瓶詰め予定量：0g</div></div>
+  <div class="field"><label>メモ・異常</label><textarea id="bMemo" rows="4"></textarea></div><button class="action primary" onclick="saveBottle()">瓶詰め記録を保存</button>`);updateBottleTotals()
 }
+function updateBottleTotals(){const grams=Number(q('bGrams')?.value||0),count=Number(q('bCount')?.value||0),target=grams*count,ps=[...document.querySelectorAll('.srcProduct')];if(ps.length===1&&document.activeElement!==ps[0])ps[0].value=target||0;const product=ps.reduce((a,x)=>a+Number(x.value||0),0),loss=[...document.querySelectorAll('.srcLoss')].reduce((a,x)=>a+Number(x.value||0),0);if(q('bTotal'))q('bTotal').innerHTML=`瓶詰め予定量：${target}g<br><span class="mini">製品使用 ${product}g ／ ロス ${loss}g</span>`}
 function saveBottle(){
   if(!bottleSelection.length)return alert('採蜜ロットを選び直してください。');const count=Number(q('bCount').value||0);if(count<=0)return alert('本数を入れてください。');const grams=Number(q('bGrams').value||0);if(grams<=0)return alert('内容量を入れてください。');
+  const target=grams*count,products=[...document.querySelectorAll('.srcProduct')],losses=[...document.querySelectorAll('.srcLoss')],finishes=[...document.querySelectorAll('.srcFinish')];const productTotal=products.reduce((a,x)=>a+Number(x.value||0),0);if(Math.abs(productTotal-target)>0.5)return alert(`製品に使用する量の合計を ${target}g にしてください。現在は ${productTotal}g です。`);
+  const allocations=bottleSelection.map(h=>{const pe=products.find(x=>x.dataset.id===String(h.id)),le=losses.find(x=>x.dataset.id===String(h.id)),fe=finishes.find(x=>x.dataset.id===String(h.id));const productGrams=Number(pe?.value||0),lossGrams=Number(le?.value||0),before=harvestRemainingGrams(h);return {harvestId:String(h.id),lot:h.lot,productGrams,lossGrams,beforeGrams:before,finish:Boolean(fe?.checked)}});
+  try{for(const a of allocations){if(a.productGrams+a.lossGrams>a.beforeGrams+0.5)throw new Error(`${a.lot} の使用量＋ロス量が残量を超えています。`)}}catch(e){return alert(e.message)}
+  const steps=[...document.querySelectorAll('.bStepCk')].map(x=>x.checked);if(steps.some(x=>!x)&&!confirm('瓶詰め工程に未チェックがあります。このまま保存しますか？'))return;
   const date=q('bDate').value||today(),lot=nextLot('P',date,db.bottles),checks=[...document.querySelectorAll('.bCk')].map(x=>x.checked),srcIds=bottleSelection.map(x=>String(x.id)),srcLots=bottleSelection.map(x=>x.lot);
-  const rec={id:uid('b'),date,lot,srcIds,srcLots,grams,count,checks,memo:q('bMemo').value.trim(),createdAt:Date.now()};db.bottles.unshift(rec);save();bottleSelection=[];
-  shell('瓶詰め記録を保存しました',`<div class="card"><small>製品ロット</small><div class="lot">${esc(lot)}</div><p>${grams}g × ${count}本</p><p>採蜜ロット：${esc(srcLots.join(' ＋ '))}</p><p class="${checks.every(Boolean)?'ok':'danger'}">衛生チェック ${checks.filter(Boolean).length}/${checks.length}</p></div><button class="action primary" onclick="page('home')">ホームへ</button>`)
+  const rec={id:uid('b'),date,lot,srcIds,srcLots,grams,count,allocations,steps,checks,memo:q('bMemo').value.trim(),createdAt:Date.now()};db.bottles.unshift(rec);for(const a of allocations){if(a.finish){const h=db.harvests.find(x=>String(x.id)===a.harvestId);if(h){const after=Math.max(0,a.beforeGrams-a.productGrams-a.lossGrams);a.finalLossGrams=after;h.closed=true;h.closedAt=Date.now()}}}save();bottleSelection=[];
+  const loss=allocations.reduce((a,x)=>a+Number(x.lossGrams||0)+Number(x.finalLossGrams||0),0);shell('瓶詰め記録を保存しました',`<div class="card"><small>製品ロット</small><div class="lot">${esc(lot)}</div><p>${grams}g × ${count}本（${target}g）</p><p>採蜜ロット：${esc(srcLots.join(' ＋ '))}</p><p>作業ロス：${loss}g</p><p class="${checks.every(Boolean)?'ok':'danger'}">衛生チェック ${checks.filter(Boolean).length}/${checks.length}</p></div><button class="action primary" onclick="page('home')">ホームへ</button>`)
 }
 
 function records(){
@@ -115,7 +126,7 @@ function records(){
   <h2 class="section">瓶詰め記録</h2>${db.bottles.length?db.bottles.map(b=>bottleRecordHtml(b)).join(''):'<div class="empty panel">まだ瓶詰め記録がありません。</div>'}`)
 }
 function harvestRecordHtml(h){return `<div class="item"><b>🍯 ${esc(h.lot)}</b><div class="mini">${esc(fmtDate(h.date))} ／ ${h.mixed?'複数群混合':'非混合'}</div><div class="pillline">${(h.hives||[]).map(x=>`<span class="badge blue">${esc(x.name)}</span>`).join('')}</div><div class="pending-meta">採蜜量：${esc(h.kg||'-')}kg ／ 容器：${esc(h.container||'-')}<br>衛生チェック ${(h.checks||[]).filter(Boolean).length}/${(h.checks||[]).length||harvestChecks.length}${h.memo?`<br>メモ：${esc(h.memo)}`:''}</div></div>`}
-function bottleRecordHtml(b){return `<div class="item"><b>🫙 ${esc(b.lot)}</b><div class="mini">${esc(fmtDate(b.date))}</div><div class="pillline">${(b.srcLots||[]).map(x=>`<span class="badge gold">${esc(x)}</span>`).join('')}</div><div class="pending-meta">${esc(b.grams)}g × ${esc(b.count)}本<br>衛生チェック ${(b.checks||[]).filter(Boolean).length}/${(b.checks||[]).length||bottleChecks.length}${b.memo?`<br>メモ：${esc(b.memo)}`:''}</div></div>`}
+function bottleRecordHtml(b){return `<div class="item"><b>🫙 ${esc(b.lot)}</b><div class="mini">${esc(fmtDate(b.date))}</div><div class="pillline">${(b.srcLots||[]).map(x=>`<span class="badge gold">${esc(x)}</span>`).join('')}</div><div class="pending-meta">${esc(b.grams)}g × ${esc(b.count)}本${Array.isArray(b.allocations)?`<br>使用：${b.allocations.map(a=>`${esc(a.lot)} ${esc(a.productGrams)}g`).join(' ／ ')}<br>ロス：${b.allocations.reduce((n,a)=>n+Number(a.lossGrams||0)+Number(a.finalLossGrams||0),0)}g`:''}<br>衛生チェック ${(b.checks||[]).filter(Boolean).length}/${(b.checks||[]).length||bottleChecks.length}${b.memo?`<br>メモ：${esc(b.memo)}`:''}</div></div>`}
 function reportRange(){const from=q('rFrom')?.value||'0000-00-00',to=q('rTo')?.value||'9999-99-99';return {from,to,harvests:db.harvests.filter(x=>x.date>=from&&x.date<=to),bottles:db.bottles.filter(x=>x.date>=from&&x.date<=to)}}
 function exportCSV(){
   const r=reportRange(),rows=[['区分','日付','ロット','由来群/採蜜ロット','採蜜量kg/内容量g','本数','衛生チェック','メモ']];

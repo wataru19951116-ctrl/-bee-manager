@@ -1,4 +1,4 @@
-const CACHE = "bee-record-haccp-v60";
+const CACHE = "bee-record-haccp-v61";
 const CORE = [
   "./",
   "./index.html",
